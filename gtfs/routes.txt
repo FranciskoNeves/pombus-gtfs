@@ -1,0 +1,2 @@
+route_id,agency_id,route_short_name,route_long_name,route_type,route_color,route_text_color
+L1,POMBUS,1,"Linha 1 - Azul",3,0072BC,FFFFFF

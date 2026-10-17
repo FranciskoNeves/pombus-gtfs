@@ -1,0 +1,9 @@
+route_id,service_id,trip_id
+L1,escolar,L1-1
+L1,escolar,L1-2
+L1,escolar,L1-3
+L1,escolar,L1-4
+L1,escolar,L1-5
+L1,escolar,L1-6
+L1,escolar,L1-7
+L1,escolar,L1-8
