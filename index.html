@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Pombus — Linha 1 Azul</title>
+<style>
+  :root { font-family: system-ui, sans-serif; color: #111827; background: #f1f5f9; }
+  * { box-sizing: border-box; }
+  body { margin: 0; }
+  header { background: #0072BC; color: #fff; padding: 14px 20px; }
+  header h1 { margin: 0; font-size: 20px; }
+  header p { margin: 4px 0 0; font-size: 12px; opacity: .9; }
+  nav { display: flex; gap: 4px; padding: 10px 20px 0; background: #e2e8f0; }
+  nav button { border: none; background: #cbd5e1; padding: 8px 18px; border-radius: 8px 8px 0 0; cursor: pointer; font-size: 14px; }
+  nav button.active { background: #fff; font-weight: 600; }
+  main { padding: 16px 20px 40px; }
+  .warn { background: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px; padding: 8px 12px; font-size: 13px; margin-bottom: 14px; }
+  .ok { background: #dcfce7; border: 1px solid #16a34a; }
+  .cols { display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-start; }
+  .mapwrap { background: #fff; border: 1px solid #cbd5e1; border-radius: 10px; padding: 8px; flex: 1 1 620px; }
+  .panel { background: #fff; border: 1px solid #cbd5e1; border-radius: 10px; padding: 14px; flex: 1 1 260px; min-width: 260px; max-height: 640px; overflow: auto; }
+  .panel h3 { margin: 0 0 4px; font-size: 15px; }
+  .panel .coords { font-size: 11px; color: #64748b; margin-bottom: 8px; }
+  .dep { display: flex; justify-content: space-between; font-variant-numeric: tabular-nums; font-size: 14px; padding: 4px 2px; border-bottom: 1px dashed #e2e8f0; }
+  .dep .d { color: #b45309; font-size: 11px; }
+  .trips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .trips button { border: 1px solid #0072BC; color: #0072BC; background: #fff; border-radius: 6px; padding: 5px 10px; cursor: pointer; font-size: 13px; }
+  .trips button.active { background: #0072BC; color: #fff; }
+  .trips button.draft { border-style: dashed; border-color: #94a3b8; color: #64748b; }
+  .trips button.draft.active { background: #94a3b8; color: #fff; }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; background: #fff; }
+  th, td { border-bottom: 1px solid #e2e8f0; padding: 4px 8px; text-align: left; }
+  th { background: #f1f5f9; position: sticky; top: 0; }
+  td.t { font-variant-numeric: tabular-nums; }
+  td.anc { color: #0072BC; font-weight: 600; }
+  .tt { max-height: 560px; overflow: auto; border: 1px solid #cbd5e1; border-radius: 10px; }
+  .gtfsbar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; align-items: center; }
+  select, .gtfsbar button { font-size: 14px; padding: 6px 12px; border-radius: 6px; border: 1px solid #94a3b8; background: #fff; cursor: pointer; }
+  .gtfsbar .zip { background: #0072BC; color: #fff; border-color: #0072BC; }
+  pre { background: #0f172a; color: #e2e8f0; padding: 12px; border-radius: 10px; font-size: 12px; overflow: auto; max-height: 480px; }
+  .legend { font-size: 12px; color: #475569; padding: 4px 2px 0; }
+  .leg1 { color: #0072BC; font-weight: 600; }
+  .leg2 { color: #d97706; font-weight: 600; }
+  .stopc { cursor: pointer; }
+  .stopc:hover { stroke: #111827; stroke-width: 2; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Pombus — Linha 1 · Azul</h1>
+  <p>Mapa com coordenadas reais das paragens · viagem 07:10 com horário oficial · exportação GTFS</p>
+</header>
+<nav>
+  <button id="tab-map" class="active">Mapa</button>
+  <button id="tab-hor">Horário</button>
+  <button id="tab-gtfs">GTFS</button>
+</nav>
+<main>
+  <div class="warn ok"><b>Viagem 07:10–08:05:</b> tempos oficiais nas paragens-chave; paragens intermédias interpoladas por distância.</div>
+  <div class="warn">As restantes 7 viagens ainda estão em <b>DRAFT</b> (partidas antigas de 01/2026, 2 min/perna) e o calendário (14/09/2026–15/06/2027, dias letivos) é suposição.</div>
+
+  <div id="sec-map" class="cols">
+    <div class="mapwrap">
+      <svg id="map" width="100%" viewBox="0 0 980 610" xmlns="http://www.w3.org/2000/svg"></svg>
+      <div class="legend"><span class="leg1">—</span> loop urbano (Cardal → Cercipom → Cardal) &nbsp; <span class="leg2">—</span> loop da Charneca (Cardal → Charneca → Cardal)</div>
+    </div>
+    <div class="panel" id="stop-panel"><h3>Clica numa paragem</h3><div class="coords">Vê as partidas de cada paragem nas 8 viagens do dia.</div></div>
+  </div>
+
+  <div id="sec-hor" style="display:none">
+    <div class="trips" id="trip-btns"></div>
+    <div class="tt"><table id="tt-table"></table></div>
+  </div>
+
+  <div id="sec-gtfs" style="display:none">
+    <div class="gtfsbar">
+      <select id="gtfs-file"></select>
+      <button id="btn-copy">Copiar</button>
+      <button id="btn-dl">Descarregar ficheiro</button>
+      <button id="btn-zip" class="zip">Descarregar pombus-gtfs.zip</button>
+    </div>
+    <pre id="gtfs-pre"></pre>
+  </div>
+</main>
+
+<script>
+/* ============================================================
+   BLOCO EDITÁVEL — altera aqui e o mapa + GTFS regeneram
+   ============================================================ */
+const AGENCY = {
+  agency_id: "POMBUS",
+  agency_name: "Pombus - Câmara Municipal de Pombal",
+  agency_url: "https://www.cm-pombal.pt/servicos/pombus",
+  agency_timezone: "Europe/Lisbon"
+};
+const SERVICE = { service_id: "escolar", start_date: "20260914", end_date: "20270615" }; // ASSUNÇÃO
+const ROUTE = { route_id: "L1", short_name: "1", long_name: "Linha 1 - Azul", color: "0072BC", text_color: "FFFFFF", route_type: 3 };
+const FEED_VERSION = "2026-10-16-viagem1-oficial";
+
+// Paragens por ordem de rota (coordenadas WGS84 fornecidas pelo utilizador)
+const STOPS = [
+["Largo do Cardal",39.91587686942787,-8.628326152997865],
+["Mercado",39.916435322302185,-8.626376225203702],
+["Hospital",39.91696196440774,-8.624493314564981],
+["Rot. do Bombeiro",39.9174310016416,-8.621725274827353],
+["Casarelo",39.91395411754951,-8.617774659456206],
+["Escola M. de Pombal",39.919409068385654,-8.623128973540204],
+["Governos 1 (R. dos Adoradores do Sol)",39.9218355093016,-8.624195919069834],
+["Governos 2 (R. Miguel Torga)",39.922658235530896,-8.624604045028791],
+["Governos 3 (R. dos Governos 1)",39.92246898973844,-8.621170817585858],
+["Governos 4 (R. dos Governos 2)",39.92407844132072,-8.619916546421287],
+["Governos 5 (Rotunda)",39.92473666984518,-8.618339407595691],
+["Vinagres 1 (R. dos Vinagres)",39.92312384785638,-8.617350732928017],
+["Vinagres 2 (R. dos Vinagres)",39.922067903444564,-8.618624631079244],
+["Vinagres 3 (R. dos Vinagres)",39.92150730760502,-8.619010087453045],
+["Jardim Biscarrose",39.92007259599271,-8.620933575546816],
+["R. Aristides S. Mendes",39.91933216207925,-8.618630642994638],
+["R. A. Gaspar Serrano",39.91978330059572,-8.61525627124968],
+["Bairro dos Caseirinhos",39.91977429209136,-8.611746401530118],
+["Rot. do Agricultor",39.91972288096032,-8.613385681195535],
+["Avenida (Cercipom)",39.91868808381511,-8.617605907025482],
+["Rot. do Bombeiro (volta)",39.91791358397185,-8.621079684584654],
+["Casarelo (volta)",39.91395411754951,-8.617774659456206],
+["Hospital (volta)",39.91699423595943,-8.624622835887408],
+["Mercado (volta)",39.9167071757663,-8.626520334128205],
+["Largo do Cardal (volta)",39.91587686942787,-8.628326152997865],
+["Rot. da Cooperativa",39.91452770069942,-8.631158508712424],
+["Estrada da Charneca",39.91373212717548,-8.635934849556207],
+["R. da Fonte Nova (Filarmónica)",39.91336305767427,-8.638751735380591],
+["APRAP",39.91557736867985,-8.640622740866988],
+["Urb. Fonte Nova (R. do Pinhal)",39.913860168989316,-8.641902363036438],
+["Escola Gualdim Pais",39.91096749025797,-8.641420422406489],
+["R. Pinhal Leitão",39.909134031988614,-8.644917120849192],
+["R. do Valinho (Tv. Bom Jesus)",39.90889631569834,-8.646911171808165],
+["R. Vale da Barreira",39.90826450194526,-8.649850426456126],
+["R. das Maiorcas",39.90621949282264,-8.653923902244514],
+["R. do Lagar",39.906824015154854,-8.651166273269693],
+["Charneca (R. Direita)",39.90485915330056,-8.656237623695635],
+["Charneca (R. Principal)",39.90410279407748,-8.652062083729888],
+["Charneca (Capela)",39.9037646008503,-8.648164398870545],
+["Centro Recreativo da Charneca",39.9060127704469,-8.643443487884598],
+["R. do Emporão",39.903969190322975,-8.64531763108019],
+["R. do Lar",39.90518548909817,-8.63997752921317],
+["Lar Rainha Sta. Isabel",39.9061214883847,-8.641136009660318],
+["R. da Misericórdia - Tv. D. Leonor",39.90777054192547,-8.639354105663417],
+["Urb. D. Inês (Rot. Biscarrose)",39.90904476596781,-8.638081687116635],
+["Escadaria Gualdim Pais",39.91093438233437,-8.64044199694207],
+["Escola Gualdim Pais (volta)",39.91128956850127,-8.641308497981873],
+["Urb. Fonte Nova (R. do Pinhal) (volta)",39.913872988547084,-8.641757054391649],
+["APRAP (volta)",39.91553101896992,-8.640677962410265],
+["R. da Fonte Nova (Filarmónica) (volta)",39.913387067478816,-8.638534156999235],
+["Estrada da Charneca (volta)",39.913678069911974,-8.635661733752327],
+["Rot. da Cooperativa (volta)",39.91426385726057,-8.63119190702548],
+["Largo do Cardal (fim)",39.915863532349626,-8.628185333393409]
+];
+
+/* Viagens.
+   - Oficial: anchors = [índiceDaParagem, "HH:MM(chegada)", "HH:MM(partida, opcional)"].
+     Paragens intermédias interpoladas por distância entre âncoras.
+   - Draft: start + 2 min/perna (provisório). */
+const TRIPS = [
+  { id: "V1", official: true, anchors: [
+      [0,"07:10"], [5,"07:14"], [6,"07:16"], [10,"07:18"], [13,"07:21"],
+      [16,"07:25"], [24,"07:35","07:36"], [27,"07:41"], [30,"07:51"],
+      [41,"07:56"], [44,"07:58"], [46,"08:00"], [51,"08:04"], [52,"08:05"]
+  ]},
+  { id: "V2", draft: true, start: "08:10" },
+  { id: "V3", draft: true, start: "11:00" },
+  { id: "V4", draft: true, start: "12:00" },
+  { id: "V5", draft: true, start: "13:30" },
+  { id: "V6", draft: true, start: "16:45" },
+  { id: "V7", draft: true, start: "17:42" },
+  { id: "V8", draft: true, start: "18:40" }
+];
+const DRAFT_LEG_MIN = 2; // min/perna para viagens DRAFT
+/* ============ fim do bloco editável ============ */
+
+const pad = n => String(n).padStart(2, "0");
+const sid = i => "P" + pad(i + 1);
+const toMin = t => (+t.split(":")[0]) * 60 + (+t.split(":")[1]);
+const hhmm = m => { const r = Math.round(m); return pad(Math.floor(r / 60) % 24) + ":" + pad(r % 60); };
+
+// distância (m) entre paragens consecutivas — haversine
+const R = 6371000;
+const distM = (a, b) => {
+  const dLa = (b[1] - a[1]) * Math.PI / 180, dLo = (b[2] - a[2]) * Math.PI / 180;
+  const la1 = a[1] * Math.PI / 180, la2 = b[1] * Math.PI / 180;
+  const h = Math.sin(dLa / 2) ** 2 + Math.cos(la1) * Math.cos(la2) * Math.sin(dLo / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(h));
+};
+const LEG_DIST = STOPS.slice(1).map((_, i) => distM(STOPS[i], STOPS[i + 1] || STOPS[i]));
+
+// tempo de cada paragem por viagem: {arr:[min], dep:[min], isAnchor:[]}
+function tripTimes(trip) {
+  const n = STOPS.length;
+  const arr = new Array(n), dep = new Array(n), isAnc = new Array(n).fill(false);
+  if (trip.draft) {
+    const s = toMin(trip.start);
+    for (let i = 0; i < n; i++) { arr[i] = s + DRAFT_LEG_MIN * i; dep[i] = arr[i]; }
+    return { arr, dep, isAnc };
+  }
+  const A = trip.anchors.map(a => ({ i: a[0], t: toMin(a[1]), dep: a[2] ? toMin(a[2]) : null }));
+  for (const a of A) { arr[a.i] = a.t; dep[a.i] = a.dep || a.t; isAnc[a.i] = true; }
+  for (let k = 0; k < A.length - 1; k++) {
+    const a = A[k], b = A[k + 1];
+    let d = 0;
+    const cum = [];
+    for (let i = a.i; i < b.i; i++) { d += LEG_DIST[i]; cum.push(d); }
+    for (let j = 0; j < b.i - a.i; j++) {
+      const i = a.i + 1 + j;
+      if (isAnc[i]) continue;
+      arr[i] = dep[a.i] + (cum[j] / d) * (b.t - dep[a.i]);
+      dep[i] = arr[i];
+    }
+  }
+  return { arr, dep, isAnc };
+}
+const TIMES = TRIPS.map(tripTimes);
+const TRIP_IDS = TRIPS.map((t, i) => ROUTE.route_id + "-" + (i + 1));
+
+/* ---------- MAPA ---------- */
+function buildMap() {
+  const svg = document.getElementById("map");
+  const lats = STOPS.map(s => s[1]), lons = STOPS.map(s => s[2]);
+  const minLat = Math.min(...lats), maxLat = Math.max(...lats);
+  const minLon = Math.min(...lons), maxLon = Math.max(...lons);
+  const KM_LON = 111.32 * Math.cos(minLat * Math.PI / 180), KM_LAT = 110.9;
+  const padX = 34, padY = 26;
+  const usable = 980 - 2 * padX;
+  const kmW = (maxLon - minLon) * KM_LON, kmH = (maxLat - minLat) * KM_LAT;
+  const scale = usable / kmW;
+  const H = Math.round(2 * padY + kmH * scale) + 4;
+  const X = lon => padX + (lon - minLon) * KM_LON * scale;
+  const Y = lat => H - padY - (lat - minLat) * KM_LAT * scale;
+  svg.setAttribute("viewBox", "0 0 980 " + H);
+
+  const path1 = STOPS.slice(0, 25).map((s, i) => (i ? "L" : "M") + X(s[2]).toFixed(1) + " " + Y(s[1]).toFixed(1)).join(" ");
+  const path2 = STOPS.slice(24).map((s, i) => (i ? "L" : "M") + X(s[2]).toFixed(1) + " " + Y(s[1]).toFixed(1)).join(" ");
+  let html = '<path d="' + path1 + '" fill="none" stroke="#0072BC" stroke-width="5" stroke-linejoin="round"/>';
+  html += '<path d="' + path2 + '" fill="none" stroke="#d97706" stroke-width="5" stroke-linejoin="round" stroke-dasharray="10 7"/>';
+  STOPS.forEach((s, i) => {
+    const x = X(s[2]).toFixed(1), y = Y(s[1]).toFixed(1);
+    html += '<circle class="stopc" data-i="' + i + '" cx="' + x + '" cy="' + y + '" r="6" fill="' + (i < 25 ? "#0072BC" : "#d97706") + '" stroke="#fff" stroke-width="2"><title>' + s[0] + " · " + sid(i) + '</title></circle>';
+    if (i === 0 || i === 20 || i === 52 || i === 45 || i === 37) {
+      html += '<text x="' + (+x + 9) + '" y="' + (+y + 4) + '" font-size="12" fill="#334155">' + s[0].replace(/ \(.*\)/, "") + '</text>';
+    }
+  });
+  svg.innerHTML = html;
+  svg.querySelectorAll(".stopc").forEach(c => c.addEventListener("click", () => showStop(+c.dataset.i)));
+}
+
+function showStop(i) {
+  const [name, lat, lon] = STOPS[i];
+  const rows = TRIPS.map((t, k) => {
+    const T = TIMES[k];
+    const d = T.dep[i], a = T.arr[i];
+    const time = hhmm(t.official ? (T.isAnc[i] || T.dep[i] === T.arr[i] ? d : d) : d);
+    const tag = t.official ? "" : ' <span class="d">draft</span>';
+    const mark = t.official && T.isAnc[i] ? " ●" : "";
+    return '<div class="dep"><span>' + TRIP_IDS[k] + mark + '</span><span>' + time + tag + '</span></div>';
+  }).join("");
+  document.getElementById("stop-panel").innerHTML =
+    '<h3>' + name + '</h3>' +
+    '<div class="coords">' + sid(i) + ' · ' + lat.toFixed(6) + ', ' + lon.toFixed(6) + '</div>' +
+    '<div style="font-size:12px;color:#475569;margin:6px 0;">Partidas nas 8 viagens (● = hora oficial):</div>' + rows;
+}
+
+/* ---------- HORÁRIO ---------- */
+let curTrip = 0;
+function buildTripsUI() {
+  const btns = document.getElementById("trip-btns");
+  btns.innerHTML = TRIPS.map((t, k) => {
+    const T = TIMES[k];
+    const lab = hhmm(T.dep[0]) + " → " + hhmm(T.arr[STOPS.length - 1]) + (t.official ? "" : " (draft)");
+    return '<button data-t="' + k + '" class="' + (k === curTrip ? "active " : "") + (t.official ? "" : "draft") + '">' + lab + '</button>';
+  }).join("");
+  btns.querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
+    curTrip = +b.dataset.t; buildTripsUI(); buildTT();
+  }));
+}
+function buildTT() {
+  const T = TIMES[curTrip];
+  let html = "<tr><th>#</th><th>Paragem</th><th>Chegada</th><th>Partida</th></tr>";
+  STOPS.forEach((s, i) => {
+    const cls = (TRIPS[curTrip].official && T.isAnc[i]) ? " anc" : "";
+    html += "<tr><td>" + (i + 1) + '</td><td>' + s[0] + " <span style='color:#94a3b8;font-size:11px'>" + sid(i) + "</span></td><td class='t" + cls + "'>" + hhmm(T.arr[i]) + "</td><td class='t" + cls + "'>" + hhmm(T.dep[i]) + "</td></tr>";
+  });
+  document.getElementById("tt-table").innerHTML = html;
+}
+
+/* ---------- GTFS ---------- */
+const gt = m => { const s = Math.round(m * 60); return pad(Math.floor(s / 3600) % 24) + ":" + pad(Math.floor(s / 60) % 60) + ":" + pad(s % 60); };
+function gtfsFiles() {
+  const files = {};
+  files["agency.txt"] = "agency_id,agency_name,agency_url,agency_timezone\n" +
+    [AGENCY.agency_id, AGENCY.agency_name, AGENCY.agency_url, AGENCY.agency_timezone].join(",") + "\n";
+  files["stops.txt"] = "stop_id,stop_name,stop_lat,stop_lon\n" +
+    STOPS.map((s, i) => [sid(i), '"' + s[0] + '"', s[1], s[2]].join(",")).join("\n") + "\n";
+  files["routes.txt"] = "route_id,agency_id,route_short_name,route_long_name,route_type,route_color,route_text_color\n" +
+    [ROUTE.route_id, AGENCY.agency_id, ROUTE.short_name, '"' + ROUTE.long_name + '"', ROUTE.route_type, ROUTE.color, ROUTE.text_color].join(",") + "\n";
+  files["trips.txt"] = "route_id,service_id,trip_id\n" +
+    TRIP_IDS.map(t => [ROUTE.route_id, SERVICE.service_id, t].join(",")).join("\n") + "\n";
+  let st = "trip_id,arrival_time,departure_time,stop_id,stop_sequence\n";
+  TRIP_IDS.forEach((tid, k) => {
+    const T = TIMES[k];
+    STOPS.forEach((s, i) => { st += [tid, gt(T.arr[i]), gt(T.dep[i]), sid(i), i + 1].join(",") + "\n"; });
+  });
+  files["stop_times.txt"] = st;
+  files["calendar.txt"] = "service_id,monday,tuesday,wednesday,thursday,friday,saturday,sunday,start_date,end_date\n" +
+    [SERVICE.service_id, 1, 1, 1, 1, 1, 0, 0, SERVICE.start_date, SERVICE.end_date].join(",") + "\n";
+  files["feed_info.txt"] = "feed_publisher_name,feed_publisher_url,feed_lang,feed_version\n" +
+    [AGENCY.agency_name, AGENCY.agency_url, "pt", FEED_VERSION].join(",") + "\n";
+  return files;
+}
+
+/* ZIP (store-only) com CRC32 — sem bibliotecas */
+const crcTable = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+function crc32(u8) { let c = 0xFFFFFFFF; for (let i = 0; i < u8.length; i++) c = crcTable[(c ^ u8[i]) & 0xFF] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; }
+function makeZip(entries) {
+  const enc = new TextEncoder();
+  const chunks = [], cd = [];
+  let offset = 0, cdSize = 0;
+  const w16 = v => new Uint8Array([v & 255, (v >> 8) & 255]);
+  const w32 = v => new Uint8Array([v & 255, (v >> 8) & 255, (v >> 16) & 255, (v >>> 24) & 255]);
+  const TIME = 0, DATE = ((2026 - 1980) << 9) | (10 << 5) | 16;
+  for (const e of entries) {
+    const name = enc.encode(e.name);
+    const crc = crc32(e.data);
+    chunks.push(w32(0x04034b50), w16(20), w16(0x0800), w16(0), w16(TIME), w16(DATE), w32(crc), w32(e.data.length), w32(e.data.length), w16(name.length), w16(0), name, e.data);
+    offset += 30 + name.length + e.data.length;
+    cd.push([w32(0x02014b50), w16(20), w16(20), w16(0x0800), w16(0), w16(TIME), w16(DATE), w32(crc), w32(e.data.length), w32(e.data.length), w16(name.length), w16(0), w16(0), w16(0), w16(0), w32(0), w32(offset - (30 + name.length + e.data.length)), name]);
+    cdSize += 46 + name.length;
+  }
+  const cdFlat = [];
+  let cdBytes = 0;
+  const cdOffset = offset;
+  cd.forEach(parts => { const start = cdBytes; parts.forEach(p => { cdFlat.push(p); cdBytes += p.length; }); });
+  chunks.push(...cdFlat);
+  chunks.push(w32(0x06054b50), w16(0), w16(0), w16(entries.length), w16(entries.length), w32(cdBytes), w32(cdOffset), w16(0));
+  const total = chunks.reduce((s, c) => s + c.length, 0);
+  const out = new Uint8Array(total);
+  let p = 0;
+  for (const c of chunks) { out.set(c, p); p += c.length; }
+  return out;
+}
+
+function download(name, content, isZip) {
+  const blob = isZip ? new Blob([content]) : new Blob([content], { type: "text/csv;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+}
+
+function buildGtfsUI() {
+  const files = gtfsFiles();
+  const sel = document.getElementById("gtfs-file");
+  sel.innerHTML = Object.keys(files).map(f => '<option>' + f + '</option>').join("");
+  const pre = document.getElementById("gtfs-pre");
+  const show = () => pre.textContent = files[sel.value];
+  sel.addEventListener("change", show); show();
+  document.getElementById("btn-copy").addEventListener("click", () => {
+    navigator.clipboard.writeText(files[sel.value]).then(() => { document.getElementById("btn-copy").textContent = "Copiado!"; setTimeout(() => document.getElementById("btn-copy").textContent = "Copiar", 1200); });
+  });
+  document.getElementById("btn-dl").addEventListener("click", () => download(sel.value, files[sel.value], false));
+  document.getElementById("btn-zip").addEventListener("click", () => {
+    const enc = new TextEncoder();
+    const entries = Object.keys(files).map(f => ({ name: f, data: enc.encode(files[f]) }));
+    download("pombus-gtfs.zip", makeZip(entries), true);
+  });
+}
+
+/* ---------- TABS ---------- */
+const tabs = { "tab-map": "sec-map", "tab-hor": "sec-hor", "tab-gtfs": "sec-gtfs" };
+Object.keys(tabs).forEach(id => document.getElementById(id).addEventListener("click", () => {
+  Object.keys(tabs).forEach(t => document.getElementById(t).classList.toggle("active", t === id));
+  Object.values(tabs).forEach(s => document.getElementById(s).style.display = "none");
+  document.getElementById(tabs[id]).style.display = "";
+}));
+
+buildMap();
+buildTripsUI();
+buildTT();
+buildGtfsUI();
+</script>
+</body>
+</html>
