@@ -1,9 +1,11 @@
-route_id,service_id,trip_id
-L1,escolar,L1-1
-L1,escolar,L1-2
-L1,escolar,L1-3
-L1,escolar,L1-4
-L1,escolar,L1-5
-L1,escolar,L1-6
-L1,escolar,L1-7
-L1,escolar,L1-8
+route_id,service_id,trip_id,trip_headsign,direction_id
+L1,escolar,L1-0710,"Circular via Lar Rainha Sta. Isabel",0
+L1,escolar,L1-0810,"Circular via Centro Recreativo",0
+L1,escolar,L1-0900,"Circular via Lar Rainha Sta. Isabel",0
+L1,escolar,L1-1100,"Circular via Centro Recreativo",0
+L1,escolar,L1-1200,"Circular via Lar Rainha Sta. Isabel",0
+L1,escolar,L1-1330,"Circular via Lar Rainha Sta. Isabel",0
+L1,escolar,L1-1542,"Circular via Lar Rainha Sta. Isabel",0
+L1,escolar,L1-1645,"Circular via Lar Rainha Sta. Isabel",0
+L1,escolar,L1-1742,"Circular via Centro Recreativo",0
+L1,escolar,L1-1840,"Circular via Centro Recreativo",0
