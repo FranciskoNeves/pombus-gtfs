@@ -49,7 +49,7 @@
 <body>
 <header>
   <h1>Pombus — Linha 1 · Azul</h1>
-  <p>Mapa com coordenadas reais das paragens · viagem 07:10 com horário oficial · exportação GTFS</p>
+  <p>10 viagens diárias (07:10 → 19:34) · coordenadas reais · padrões A/B na Charneca · exportação GTFS</p>
 </header>
 <nav>
   <button id="tab-map" class="active">Mapa</button>
@@ -57,15 +57,15 @@
   <button id="tab-gtfs">GTFS</button>
 </nav>
 <main>
-  <div class="warn ok"><b>Viagem 07:10–08:05:</b> tempos oficiais nas paragens-chave; paragens intermédias interpoladas por distância.</div>
-  <div class="warn">As restantes 7 viagens ainda estão em <b>DRAFT</b> (partidas antigas de 01/2026, 2 min/perna) e o calendário (14/09/2026–15/06/2027, dias letivos) é suposição.</div>
+    <div class="warn ok"><b>Linha 1 completa:</b> 10 viagens com tempos oficiais confirmados; paragens intermédias interpoladas por distância (precisão ao segundo).</div>
+  <div class="warn">O calendário (14/09/2026–15/06/2027, dias úteis) é suposição e o horário oficial é provisório, sujeito a alteração.</div>
 
   <div id="sec-map" class="cols">
     <div class="mapwrap">
       <svg id="map" width="100%" viewBox="0 0 980 610" xmlns="http://www.w3.org/2000/svg"></svg>
       <div class="legend"><span class="leg1">—</span> loop urbano (Cardal → Cercipom → Cardal) &nbsp; <span class="leg2">—</span> loop da Charneca (Cardal → Charneca → Cardal)</div>
     </div>
-    <div class="panel" id="stop-panel"><h3>Clica numa paragem</h3><div class="coords">Vê as partidas de cada paragem nas 8 viagens do dia.</div></div>
+    <div class="panel" id="stop-panel"><h3>Clica numa paragem</h3><div class="coords">Vê as partidas de cada paragem nas 10 viagens do dia.</div></div>
   </div>
 
   <div id="sec-hor" style="display:none">
@@ -96,7 +96,7 @@ const AGENCY = {
 };
 const SERVICE = { service_id: "escolar", start_date: "20260914", end_date: "20270615" }; // ASSUNÇÃO
 const ROUTE = { route_id: "L1", short_name: "1", long_name: "Linha 1 - Azul", color: "0072BC", text_color: "FFFFFF", route_type: 3 };
-const FEED_VERSION = "2026-10-16-viagem1-oficial";
+const FEED_VERSION = "2026-10-18-linha1-completa-10viagens";
 
 // Paragens por ordem de rota (coordenadas WGS84 fornecidas pelo utilizador)
 const STOPS = [
@@ -155,69 +155,523 @@ const STOPS = [
 ["Largo do Cardal (fim)",39.915863532349626,-8.628185333393409]
 ];
 
-/* Viagens.
-   - Oficial: anchors = [índiceDaParagem, "HH:MM(chegada)", "HH:MM(partida, opcional)"].
-     Paragens intermédias interpoladas por distância entre âncoras.
-   - Draft: start + 2 min/perna (provisório). */
+/* Viagens — cada viagem lista APENAS as paragens que serve:
+   [índice, "HH:MM:SS"] chegada = partida · [índice, "chegada", "partida"] quando diferem.
+   pattern A = via Lar Rainha Sta. Isabel · pattern B = via Centro Recreativo (salta P41–P51).
+   Casarelo (P05) só nas viagens 08:10 e 15:42 (desvio). */
 const TRIPS = [
-  { id: "V1", official: true, anchors: [
-      [0,"07:10"], [5,"07:14"], [6,"07:16"], [10,"07:18"], [13,"07:21"],
-      [16,"07:25"], [24,"07:35","07:36"], [27,"07:41"], [30,"07:51"],
-      [41,"07:56"], [44,"07:58"], [46,"08:00"], [51,"08:04"], [52,"08:05"]
-  ]},
-  { id: "V2", draft: true, start: "08:10" },
-  { id: "V3", draft: true, start: "11:00" },
-  { id: "V4", draft: true, start: "12:00" },
-  { id: "V5", draft: true, start: "13:30" },
-  { id: "V6", draft: true, start: "16:45" },
-  { id: "V7", draft: true, start: "17:42" },
-  { id: "V8", draft: true, start: "18:40" }
+  { id: "L1-0710", pattern: "A", head: "Circular via Lar Rainha Sta. Isabel", stops: [
+    [0,"07:10:00"],
+    [1,"07:10:23"],
+    [2,"07:10:45"],
+    [3,"07:11:16"],
+    [5,"07:14:00"],
+    [6,"07:16:00"],
+    [7,"07:16:16"],
+    [8,"07:17:02"],
+    [9,"07:17:36"],
+    [10,"07:18:00"],
+    [11,"07:19:23"],
+    [12,"07:20:31"],
+    [13,"07:21:00"],
+    [14,"07:22:15"],
+    [15,"07:24:25"],
+    [16,"07:25:00"],
+    [17,"07:26:37"],
+    [18,"07:27:23"],
+    [19,"07:29:25"],
+    [20,"07:32:24"],
+    [21,"07:33:17"],
+    [22,"07:34:25"],
+    [23,"07:34:42"],
+    [24,"07:35:00","07:36:00"],
+    [25,"07:37:00"],
+    [26,"07:39:31"],
+    [27,"07:41:00"],
+    [28,"07:42:24"],
+    [29,"07:43:27"],
+    [30,"07:45:00"],
+    [31,"07:45:56"],
+    [32,"07:46:23"],
+    [33,"07:47:04"],
+    [34,"07:48:09"],
+    [35,"07:48:47"],
+    [36,"07:50:02"],
+    [37,"07:51:00"],
+    [38,"07:52:10"],
+    [40,"07:54:21"],
+    [41,"07:56:00"],
+    [42,"07:56:31"],
+    [43,"07:57:22"],
+    [44,"07:58:00"],
+    [45,"07:59:33"],
+    [46,"08:00:00"],
+    [47,"08:00:49"],
+    [48,"08:01:23"],
+    [49,"08:02:14"],
+    [50,"08:02:55"],
+    [51,"08:04:00"],
+    [52,"08:05:00"]
+  ] },
+  { id: "L1-0810", pattern: "B", head: "Circular via Centro Recreativo", stops: [
+    [0,"08:10:00"],
+    [1,"08:10:23"],
+    [2,"08:10:45"],
+    [3,"08:11:16"],
+    [4,"08:17:00"],
+    [5,"08:22:00"],
+    [6,"08:24:00"],
+    [7,"08:24:16"],
+    [8,"08:25:02"],
+    [9,"08:25:36"],
+    [10,"08:26:00"],
+    [11,"08:27:23"],
+    [12,"08:28:31"],
+    [13,"08:29:00"],
+    [14,"08:30:15"],
+    [15,"08:32:25"],
+    [16,"08:33:00"],
+    [17,"08:34:37"],
+    [18,"08:35:23"],
+    [19,"08:37:25"],
+    [20,"08:40:49"],
+    [21,"08:44:17"],
+    [22,"08:48:04"],
+    [23,"08:49:00"],
+    [24,"08:50:00"],
+    [25,"08:51:00"],
+    [26,"08:53:31"],
+    [27,"08:55:00"],
+    [28,"08:56:24"],
+    [29,"08:57:27"],
+    [30,"08:58:00"],
+    [31,"08:58:56"],
+    [32,"08:59:23"],
+    [33,"09:00:04"],
+    [34,"09:01:09"],
+    [35,"09:01:47"],
+    [36,"09:03:02"],
+    [37,"09:04:00"],
+    [38,"09:05:10"],
+    [39,"09:08:00"],
+    [51,"09:12:00"],
+    [52,"09:13:00"]
+  ] },
+  { id: "L1-0900", pattern: "A", head: "Circular via Lar Rainha Sta. Isabel", stops: [
+    [0,"09:00:00"],
+    [1,"09:00:23"],
+    [2,"09:00:45"],
+    [3,"09:01:16"],
+    [5,"09:04:00"],
+    [6,"09:06:00"],
+    [7,"09:06:16"],
+    [8,"09:07:02"],
+    [9,"09:07:36"],
+    [10,"09:08:00"],
+    [11,"09:09:23"],
+    [12,"09:10:31"],
+    [13,"09:11:00"],
+    [14,"09:12:15"],
+    [15,"09:14:25"],
+    [16,"09:15:00"],
+    [17,"09:16:37"],
+    [18,"09:17:23"],
+    [19,"09:19:25"],
+    [20,"09:22:24"],
+    [21,"09:23:17"],
+    [22,"09:24:25"],
+    [23,"09:24:42"],
+    [24,"09:25:00","09:26:00"],
+    [25,"09:27:00"],
+    [26,"09:29:31"],
+    [27,"09:31:00"],
+    [28,"09:32:24"],
+    [29,"09:33:27"],
+    [30,"09:35:00"],
+    [31,"09:35:56"],
+    [32,"09:36:23"],
+    [33,"09:37:04"],
+    [34,"09:38:09"],
+    [35,"09:38:47"],
+    [36,"09:40:02"],
+    [37,"09:41:00"],
+    [38,"09:42:10"],
+    [40,"09:44:21"],
+    [41,"09:46:00"],
+    [42,"09:46:31"],
+    [43,"09:47:22"],
+    [44,"09:48:00"],
+    [45,"09:49:33"],
+    [46,"09:50:00"],
+    [47,"09:50:49"],
+    [48,"09:51:23"],
+    [49,"09:52:14"],
+    [50,"09:52:55"],
+    [51,"09:54:00"],
+    [52,"09:55:00"]
+  ] },
+  { id: "L1-1100", pattern: "B", head: "Circular via Centro Recreativo", stops: [
+    [0,"11:00:00"],
+    [1,"11:00:23"],
+    [2,"11:00:45"],
+    [3,"11:01:16"],
+    [5,"11:04:00"],
+    [6,"11:06:00"],
+    [7,"11:06:16"],
+    [8,"11:07:02"],
+    [9,"11:07:36"],
+    [10,"11:08:00"],
+    [11,"11:09:23"],
+    [12,"11:10:31"],
+    [13,"11:11:00"],
+    [14,"11:12:15"],
+    [15,"11:14:25"],
+    [16,"11:15:00"],
+    [17,"11:16:37"],
+    [18,"11:17:23"],
+    [19,"11:19:25"],
+    [20,"11:22:24"],
+    [21,"11:23:17"],
+    [22,"11:24:25"],
+    [23,"11:24:42"],
+    [24,"11:25:00","11:26:00"],
+    [25,"11:27:00"],
+    [26,"11:29:31"],
+    [27,"11:31:00"],
+    [28,"11:32:24"],
+    [29,"11:33:27"],
+    [30,"11:35:00"],
+    [31,"11:35:56"],
+    [32,"11:36:23"],
+    [33,"11:37:04"],
+    [34,"11:38:09"],
+    [35,"11:38:47"],
+    [36,"11:40:02"],
+    [37,"11:41:00"],
+    [38,"11:42:10"],
+    [39,"11:45:00"],
+    [51,"11:54:00"],
+    [52,"11:55:00"]
+  ] },
+  { id: "L1-1200", pattern: "A", head: "Circular via Lar Rainha Sta. Isabel", stops: [
+    [0,"12:00:00"],
+    [1,"12:00:23"],
+    [2,"12:00:45"],
+    [3,"12:01:16"],
+    [5,"12:04:00"],
+    [6,"12:06:00"],
+    [7,"12:06:16"],
+    [8,"12:07:02"],
+    [9,"12:07:36"],
+    [10,"12:08:00"],
+    [11,"12:09:23"],
+    [12,"12:10:31"],
+    [13,"12:11:00"],
+    [14,"12:12:15"],
+    [15,"12:14:25"],
+    [16,"12:15:00"],
+    [17,"12:16:37"],
+    [18,"12:17:23"],
+    [19,"12:19:25"],
+    [20,"12:22:24"],
+    [21,"12:23:17"],
+    [22,"12:24:25"],
+    [23,"12:24:42"],
+    [24,"12:25:00","12:26:00"],
+    [25,"12:27:00"],
+    [26,"12:29:31"],
+    [27,"12:31:00"],
+    [28,"12:32:24"],
+    [29,"12:33:27"],
+    [30,"12:35:00"],
+    [31,"12:35:56"],
+    [32,"12:36:23"],
+    [33,"12:37:04"],
+    [34,"12:38:09"],
+    [35,"12:38:47"],
+    [36,"12:40:02"],
+    [37,"12:41:00"],
+    [38,"12:42:10"],
+    [40,"12:44:21"],
+    [41,"12:46:00"],
+    [42,"12:46:31"],
+    [43,"12:47:22"],
+    [44,"12:48:00"],
+    [45,"12:49:33"],
+    [46,"12:50:00"],
+    [47,"12:50:49"],
+    [48,"12:51:23"],
+    [49,"12:52:14"],
+    [50,"12:52:55"],
+    [51,"12:54:00"],
+    [52,"12:55:00"]
+  ] },
+  { id: "L1-1330", pattern: "A", head: "Circular via Lar Rainha Sta. Isabel", stops: [
+    [0,"13:30:00"],
+    [1,"13:30:23"],
+    [2,"13:30:45"],
+    [3,"13:31:16"],
+    [5,"13:34:00"],
+    [6,"13:36:00"],
+    [7,"13:36:16"],
+    [8,"13:37:02"],
+    [9,"13:37:36"],
+    [10,"13:38:00"],
+    [11,"13:39:23"],
+    [12,"13:40:31"],
+    [13,"13:41:00"],
+    [14,"13:42:15"],
+    [15,"13:44:25"],
+    [16,"13:45:00"],
+    [17,"13:46:37"],
+    [18,"13:47:23"],
+    [19,"13:49:25"],
+    [20,"13:52:24"],
+    [21,"13:53:17"],
+    [22,"13:54:25"],
+    [23,"13:54:42"],
+    [24,"13:55:00","13:56:00"],
+    [25,"13:57:00"],
+    [26,"13:59:31"],
+    [27,"14:01:00"],
+    [28,"14:02:24"],
+    [29,"14:03:27"],
+    [30,"14:05:00"],
+    [31,"14:05:56"],
+    [32,"14:06:23"],
+    [33,"14:07:04"],
+    [34,"14:08:09"],
+    [35,"14:08:47"],
+    [36,"14:10:02"],
+    [37,"14:11:00"],
+    [38,"14:12:10"],
+    [40,"14:14:21"],
+    [41,"14:16:00"],
+    [42,"14:16:31"],
+    [43,"14:17:22"],
+    [44,"14:18:00"],
+    [45,"14:19:33"],
+    [46,"14:20:00"],
+    [47,"14:20:49"],
+    [48,"14:21:23"],
+    [49,"14:22:14"],
+    [50,"14:22:55"],
+    [51,"14:24:00"],
+    [52,"14:25:00"]
+  ] },
+  { id: "L1-1542", pattern: "A", head: "Circular via Lar Rainha Sta. Isabel", stops: [
+    [0,"15:42:00"],
+    [1,"15:42:23"],
+    [2,"15:42:45"],
+    [3,"15:43:16"],
+    [4,"15:49:00"],
+    [5,"15:53:00"],
+    [6,"15:55:00"],
+    [7,"15:55:16"],
+    [8,"15:56:02"],
+    [9,"15:56:36"],
+    [10,"15:57:00"],
+    [11,"15:58:23"],
+    [12,"15:59:31"],
+    [13,"16:00:00"],
+    [14,"16:01:15"],
+    [15,"16:03:25"],
+    [16,"16:04:00"],
+    [17,"16:05:37"],
+    [18,"16:06:23"],
+    [19,"16:08:25"],
+    [20,"16:10:16"],
+    [21,"16:10:59"],
+    [22,"16:11:37"],
+    [23,"16:11:47"],
+    [24,"16:12:00","16:13:00"],
+    [25,"16:14:00"],
+    [26,"16:16:31"],
+    [27,"16:18:00"],
+    [28,"16:19:24"],
+    [29,"16:20:27"],
+    [30,"16:22:00"],
+    [31,"16:22:56"],
+    [32,"16:23:23"],
+    [33,"16:24:04"],
+    [34,"16:25:09"],
+    [35,"16:25:47"],
+    [36,"16:27:02"],
+    [37,"16:28:00"],
+    [38,"16:29:10"],
+    [40,"16:31:21"],
+    [41,"16:33:00"],
+    [42,"16:33:31"],
+    [43,"16:34:22"],
+    [44,"16:35:00"],
+    [45,"16:36:33"],
+    [46,"16:37:00"],
+    [47,"16:37:49"],
+    [48,"16:38:23"],
+    [49,"16:39:14"],
+    [50,"16:39:55"],
+    [51,"16:41:00"],
+    [52,"16:42:00"]
+  ] },
+  { id: "L1-1645", pattern: "A", head: "Circular via Lar Rainha Sta. Isabel", stops: [
+    [0,"16:45:00"],
+    [1,"16:45:23"],
+    [2,"16:45:45"],
+    [3,"16:46:16"],
+    [5,"16:49:00"],
+    [6,"16:51:00"],
+    [7,"16:51:16"],
+    [8,"16:52:02"],
+    [9,"16:52:36"],
+    [10,"16:53:00"],
+    [11,"16:54:23"],
+    [12,"16:55:31"],
+    [13,"16:56:00"],
+    [14,"16:57:15"],
+    [15,"16:59:25"],
+    [16,"17:01:00"],
+    [17,"17:02:37"],
+    [18,"17:03:23"],
+    [19,"17:05:25"],
+    [20,"17:09:24"],
+    [21,"17:10:17"],
+    [22,"17:11:25"],
+    [23,"17:11:42"],
+    [24,"17:12:00","17:13:00"],
+    [25,"17:14:00"],
+    [26,"17:16:31"],
+    [27,"17:18:00"],
+    [28,"17:19:24"],
+    [29,"17:20:27"],
+    [30,"17:22:00"],
+    [31,"17:22:56"],
+    [32,"17:23:23"],
+    [33,"17:24:04"],
+    [34,"17:25:09"],
+    [35,"17:25:47"],
+    [36,"17:27:02"],
+    [37,"17:28:00"],
+    [38,"17:29:10"],
+    [40,"17:31:21"],
+    [41,"17:33:00"],
+    [42,"17:33:31"],
+    [43,"17:34:22"],
+    [44,"17:35:00"],
+    [45,"17:36:33"],
+    [46,"17:37:00"],
+    [47,"17:37:49"],
+    [48,"17:38:23"],
+    [49,"17:39:14"],
+    [50,"17:39:55"],
+    [51,"17:41:00"],
+    [52,"17:42:00"]
+  ] },
+  { id: "L1-1742", pattern: "B", head: "Circular via Centro Recreativo", stops: [
+    [0,"17:42:00"],
+    [1,"17:42:23"],
+    [2,"17:42:45"],
+    [3,"17:43:16"],
+    [5,"17:46:00"],
+    [6,"17:48:00"],
+    [7,"17:48:16"],
+    [8,"17:49:02"],
+    [9,"17:49:36"],
+    [10,"17:50:00"],
+    [11,"17:51:23"],
+    [12,"17:52:31"],
+    [13,"17:53:00"],
+    [14,"17:54:15"],
+    [15,"17:56:25"],
+    [16,"17:57:00"],
+    [17,"17:58:37"],
+    [18,"17:59:23"],
+    [19,"18:01:25"],
+    [20,"18:03:24"],
+    [21,"18:04:17"],
+    [22,"18:04:45"],
+    [23,"18:04:52"],
+    [24,"18:05:00","18:06:00"],
+    [25,"18:07:00"],
+    [26,"18:09:31"],
+    [27,"18:11:00"],
+    [28,"18:12:24"],
+    [29,"18:13:27"],
+    [30,"18:15:00"],
+    [31,"18:15:56"],
+    [32,"18:16:23"],
+    [33,"18:17:04"],
+    [34,"18:18:09"],
+    [35,"18:18:47"],
+    [36,"18:20:02"],
+    [37,"18:21:00"],
+    [38,"18:22:10"],
+    [39,"18:25:00"],
+    [51,"18:30:00"],
+    [52,"18:31:00"]
+  ] },
+  { id: "L1-1840", pattern: "B", head: "Circular via Centro Recreativo", stops: [
+    [0,"18:40:00"],
+    [1,"18:40:23"],
+    [2,"18:40:45"],
+    [3,"18:41:16"],
+    [5,"18:44:00"],
+    [6,"18:46:00"],
+    [7,"18:46:16"],
+    [8,"18:47:02"],
+    [9,"18:47:36"],
+    [10,"18:48:00"],
+    [11,"18:49:23"],
+    [12,"18:50:31"],
+    [13,"18:51:00"],
+    [14,"18:52:15"],
+    [15,"18:54:25"],
+    [16,"18:55:00"],
+    [17,"18:56:37"],
+    [18,"18:57:23"],
+    [19,"18:59:25"],
+    [20,"19:05:24"],
+    [21,"19:06:17"],
+    [22,"19:07:25"],
+    [23,"19:07:42"],
+    [24,"19:08:00","19:09:00"],
+    [25,"19:10:00"],
+    [26,"19:12:31"],
+    [27,"19:14:00"],
+    [28,"19:15:24"],
+    [29,"19:16:27"],
+    [30,"19:18:00"],
+    [31,"19:18:56"],
+    [32,"19:19:23"],
+    [33,"19:20:04"],
+    [34,"19:21:09"],
+    [35,"19:21:47"],
+    [36,"19:23:02"],
+    [37,"19:24:00"],
+    [38,"19:25:10"],
+    [39,"19:28:00"],
+    [51,"19:33:00"],
+    [52,"19:34:00"]
+  ] }
 ];
-const DRAFT_LEG_MIN = 2; // min/perna para viagens DRAFT
 /* ============ fim do bloco editável ============ */
 
 const pad = n => String(n).padStart(2, "0");
 const sid = i => "P" + pad(i + 1);
-const toMin = t => (+t.split(":")[0]) * 60 + (+t.split(":")[1]);
-const hhmm = m => { const r = Math.round(m); return pad(Math.floor(r / 60) % 24) + ":" + pad(r % 60); };
+const toSec = t => { const p = t.split(":"); return (+p[0]) * 3600 + (+p[1]) * 60 + (+p[2] || 0); };
+const hhmm = s => pad(Math.floor(s / 3600) % 24) + ":" + pad(Math.floor(s / 60) % 60);
+const gt = s => pad(Math.floor(s / 3600) % 24) + ":" + pad(Math.floor(s / 60) % 60) + ":" + pad(s % 60);
 
-// distância (m) entre paragens consecutivas — haversine
-const R = 6371000;
-const distM = (a, b) => {
-  const dLa = (b[1] - a[1]) * Math.PI / 180, dLo = (b[2] - a[2]) * Math.PI / 180;
-  const la1 = a[1] * Math.PI / 180, la2 = b[1] * Math.PI / 180;
-  const h = Math.sin(dLa / 2) ** 2 + Math.cos(la1) * Math.cos(la2) * Math.sin(dLo / 2) ** 2;
-  return 2 * R * Math.asin(Math.sqrt(h));
-};
-const LEG_DIST = STOPS.slice(1).map((_, i) => distM(STOPS[i], STOPS[i + 1] || STOPS[i]));
-
-// tempo de cada paragem por viagem: {arr:[min], dep:[min], isAnchor:[]}
+// tempo (segundos) de cada paragem por viagem · null = a viagem não serve a paragem
 function tripTimes(trip) {
-  const n = STOPS.length;
-  const arr = new Array(n), dep = new Array(n), isAnc = new Array(n).fill(false);
-  if (trip.draft) {
-    const s = toMin(trip.start);
-    for (let i = 0; i < n; i++) { arr[i] = s + DRAFT_LEG_MIN * i; dep[i] = arr[i]; }
-    return { arr, dep, isAnc };
+  const arr = new Array(STOPS.length).fill(null);
+  const dep = new Array(STOPS.length).fill(null);
+  for (const s of trip.stops) {
+    arr[s[0]] = toSec(s[1]);
+    dep[s[0]] = s.length > 2 ? toSec(s[2]) : arr[s[0]];
   }
-  const A = trip.anchors.map(a => ({ i: a[0], t: toMin(a[1]), dep: a[2] ? toMin(a[2]) : null }));
-  for (const a of A) { arr[a.i] = a.t; dep[a.i] = a.dep || a.t; isAnc[a.i] = true; }
-  for (let k = 0; k < A.length - 1; k++) {
-    const a = A[k], b = A[k + 1];
-    let d = 0;
-    const cum = [];
-    for (let i = a.i; i < b.i; i++) { d += LEG_DIST[i]; cum.push(d); }
-    for (let j = 0; j < b.i - a.i; j++) {
-      const i = a.i + 1 + j;
-      if (isAnc[i]) continue;
-      arr[i] = dep[a.i] + (cum[j] / d) * (b.t - dep[a.i]);
-      dep[i] = arr[i];
-    }
-  }
-  return { arr, dep, isAnc };
+  return { arr, dep };
 }
 const TIMES = TRIPS.map(tripTimes);
-const TRIP_IDS = TRIPS.map((t, i) => ROUTE.route_id + "-" + (i + 1));
 
 /* ---------- MAPA ---------- */
 function buildMap() {
@@ -254,16 +708,15 @@ function showStop(i) {
   const [name, lat, lon] = STOPS[i];
   const rows = TRIPS.map((t, k) => {
     const T = TIMES[k];
-    const d = T.dep[i], a = T.arr[i];
-    const time = hhmm(t.official ? (T.isAnc[i] || T.dep[i] === T.arr[i] ? d : d) : d);
-    const tag = t.official ? "" : ' <span class="d">draft</span>';
-    const mark = t.official && T.isAnc[i] ? " ●" : "";
-    return '<div class="dep"><span>' + TRIP_IDS[k] + mark + '</span><span>' + time + tag + '</span></div>';
+    const served = T.dep[i] !== null;
+    const time = served ? hhmm(T.dep[i]) : "—";
+    const tag = served ? t.pattern : '<span class="d">não serve</span>';
+    return '<div class="dep"><span>' + t.id + " · " + tag + '</span><span>' + time + '</span></div>';
   }).join("");
   document.getElementById("stop-panel").innerHTML =
     '<h3>' + name + '</h3>' +
     '<div class="coords">' + sid(i) + ' · ' + lat.toFixed(6) + ', ' + lon.toFixed(6) + '</div>' +
-    '<div style="font-size:12px;color:#475569;margin:6px 0;">Partidas nas 8 viagens (● = hora oficial):</div>' + rows;
+    '<div style="font-size:12px;color:#475569;margin:6px 0;">Partidas nas 10 viagens (A/B = percurso na Charneca · — = não serve):</div>' + rows;
 }
 
 /* ---------- HORÁRIO ---------- */
@@ -272,45 +725,45 @@ function buildTripsUI() {
   const btns = document.getElementById("trip-btns");
   btns.innerHTML = TRIPS.map((t, k) => {
     const T = TIMES[k];
-    const lab = hhmm(T.dep[0]) + " → " + hhmm(T.arr[STOPS.length - 1]) + (t.official ? "" : " (draft)");
-    return '<button data-t="' + k + '" class="' + (k === curTrip ? "active " : "") + (t.official ? "" : "draft") + '">' + lab + '</button>';
+    const lab = t.id.slice(3, 5) + ":" + t.id.slice(5) + " → " + hhmm(T.arr[STOPS.length - 1]) + " (" + t.pattern + ")";
+    return '<button data-t="' + k + '" class="' + (k === curTrip ? "active" : "") + '">' + lab + '</button>';
   }).join("");
   btns.querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
     curTrip = +b.dataset.t; buildTripsUI(); buildTT();
   }));
 }
 function buildTT() {
-  const T = TIMES[curTrip];
+  const t = TRIPS[curTrip], T = TIMES[curTrip];
   let html = "<tr><th>#</th><th>Paragem</th><th>Chegada</th><th>Partida</th></tr>";
-  STOPS.forEach((s, i) => {
-    const cls = (TRIPS[curTrip].official && T.isAnc[i]) ? " anc" : "";
-    html += "<tr><td>" + (i + 1) + '</td><td>' + s[0] + " <span style='color:#94a3b8;font-size:11px'>" + sid(i) + "</span></td><td class='t" + cls + "'>" + hhmm(T.arr[i]) + "</td><td class='t" + cls + "'>" + hhmm(T.dep[i]) + "</td></tr>";
+  t.stops.forEach((s, seq) => {
+    const i = s[0];
+    html += "<tr><td>" + (seq + 1) + '</td><td>' + STOPS[i][0] + " <span style='color:#94a3b8;font-size:11px'>" + sid(i) + "</span></td><td class='t'>" + hhmm(T.arr[i]) + "</td><td class='t'>" + hhmm(T.dep[i]) + "</td></tr>";
   });
   document.getElementById("tt-table").innerHTML = html;
 }
 
 /* ---------- GTFS ---------- */
-const gt = m => { const s = Math.round(m * 60); return pad(Math.floor(s / 3600) % 24) + ":" + pad(Math.floor(s / 60) % 60) + ":" + pad(s % 60); };
+/* ---------- GTFS ---------- */
 function gtfsFiles() {
   const files = {};
   files["agency.txt"] = "agency_id,agency_name,agency_url,agency_timezone\n" +
-    [AGENCY.agency_id, AGENCY.agency_name, AGENCY.agency_url, AGENCY.agency_timezone].join(",") + "\n";
+    [AGENCY.agency_id, '"' + AGENCY.agency_name + '"', AGENCY.agency_url, AGENCY.agency_timezone].join(",") + "\n";
   files["stops.txt"] = "stop_id,stop_name,stop_lat,stop_lon\n" +
     STOPS.map((s, i) => [sid(i), '"' + s[0] + '"', s[1], s[2]].join(",")).join("\n") + "\n";
   files["routes.txt"] = "route_id,agency_id,route_short_name,route_long_name,route_type,route_color,route_text_color\n" +
     [ROUTE.route_id, AGENCY.agency_id, ROUTE.short_name, '"' + ROUTE.long_name + '"', ROUTE.route_type, ROUTE.color, ROUTE.text_color].join(",") + "\n";
-  files["trips.txt"] = "route_id,service_id,trip_id\n" +
-    TRIP_IDS.map(t => [ROUTE.route_id, SERVICE.service_id, t].join(",")).join("\n") + "\n";
+  files["trips.txt"] = "route_id,service_id,trip_id,trip_headsign,direction_id\n" +
+    TRIPS.map(t => [ROUTE.route_id, SERVICE.service_id, t.id, '"' + t.head + '"', 0].join(",")).join("\n") + "\n";
   let st = "trip_id,arrival_time,departure_time,stop_id,stop_sequence\n";
-  TRIP_IDS.forEach((tid, k) => {
+  TRIPS.forEach((t, k) => {
     const T = TIMES[k];
-    STOPS.forEach((s, i) => { st += [tid, gt(T.arr[i]), gt(T.dep[i]), sid(i), i + 1].join(",") + "\n"; });
+    t.stops.forEach((s, seq) => { st += [t.id, gt(T.arr[s[0]]), gt(T.dep[s[0]]), sid(s[0]), seq + 1].join(",") + "\n"; });
   });
   files["stop_times.txt"] = st;
   files["calendar.txt"] = "service_id,monday,tuesday,wednesday,thursday,friday,saturday,sunday,start_date,end_date\n" +
     [SERVICE.service_id, 1, 1, 1, 1, 1, 0, 0, SERVICE.start_date, SERVICE.end_date].join(",") + "\n";
   files["feed_info.txt"] = "feed_publisher_name,feed_publisher_url,feed_lang,feed_version\n" +
-    [AGENCY.agency_name, AGENCY.agency_url, "pt", FEED_VERSION].join(",") + "\n";
+    ['"' + AGENCY.agency_name + '"', AGENCY.agency_url, "pt", FEED_VERSION].join(",") + "\n";
   return files;
 }
 
