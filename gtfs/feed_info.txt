@@ -1,2 +1,2 @@
 feed_publisher_name,feed_publisher_url,feed_lang,feed_version
-"Pombus - Câmara Municipal de Pombal",https://www.cm-pombal.pt/servicos/pombus,pt,2026-10-18-linha1-completa-10viagens
+"Pombus - Câmara Municipal de Pombal",https://www.cm-pombal.pt/servicos/pombus,pt,2026-10-21-calendario-anual-feriados

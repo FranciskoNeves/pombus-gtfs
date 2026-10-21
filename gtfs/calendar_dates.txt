@@ -1,0 +1,15 @@
+service_id,date,exception_type
+escolar,20260101,2
+escolar,20260403,2
+escolar,20260405,2
+escolar,20260425,2
+escolar,20260501,2
+escolar,20260604,2
+escolar,20260610,2
+escolar,20260815,2
+escolar,20261005,2
+escolar,20261101,2
+escolar,20261111,2
+escolar,20261201,2
+escolar,20261208,2
+escolar,20261225,2

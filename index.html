@@ -58,7 +58,7 @@
 </nav>
 <main>
     <div class="warn ok"><b>Linha 1 completa:</b> 10 viagens com tempos oficiais confirmados; paragens intermédias interpoladas por distância (precisão ao segundo).</div>
-  <div class="warn">O calendário (14/09/2026–15/06/2027, dias úteis) é suposição e o horário oficial é provisório, sujeito a alteração.</div>
+  <div class="warn">Serviço todo o ano de 2026, exceto sábados, domingos e feriados (nacionais + municipal de Pombal, 11/11). O horário é provisório, sujeito a alteração.</div>
 
   <div id="sec-map" class="cols">
     <div class="mapwrap">
@@ -94,9 +94,11 @@ const AGENCY = {
   agency_url: "https://www.cm-pombal.pt/servicos/pombus",
   agency_timezone: "Europe/Lisbon"
 };
-const SERVICE = { service_id: "escolar", start_date: "20260914", end_date: "20270615" }; // ASSUNÇÃO
+const SERVICE = { service_id: "escolar", start_date: "20260101", end_date: "20261231" }; // dias úteis
+// Feriados 2026: nacionais + municipal de Pombal (11/11, São Martinho) — removidos via calendar_dates.txt
+const HOLIDAYS = ["20260101","20260403","20260405","20260425","20260501","20260604","20260610","20260815","20261005","20261101","20261111","20261201","20261208","20261225"];
 const ROUTE = { route_id: "L1", short_name: "1", long_name: "Linha 1 - Azul", color: "0072BC", text_color: "FFFFFF", route_type: 3 };
-const FEED_VERSION = "2026-10-18-linha1-completa-10viagens";
+const FEED_VERSION = "2026-10-21-calendario-anual-feriados";
 
 // Paragens por ordem de rota (coordenadas WGS84 fornecidas pelo utilizador)
 const STOPS = [
@@ -762,6 +764,8 @@ function gtfsFiles() {
   files["stop_times.txt"] = st;
   files["calendar.txt"] = "service_id,monday,tuesday,wednesday,thursday,friday,saturday,sunday,start_date,end_date\n" +
     [SERVICE.service_id, 1, 1, 1, 1, 1, 0, 0, SERVICE.start_date, SERVICE.end_date].join(",") + "\n";
+  files["calendar_dates.txt"] = "service_id,date,exception_type\n" +
+    HOLIDAYS.map(d => [SERVICE.service_id, d, 2].join(",")).join("\n") + "\n";
   files["feed_info.txt"] = "feed_publisher_name,feed_publisher_url,feed_lang,feed_version\n" +
     ['"' + AGENCY.agency_name + '"', AGENCY.agency_url, "pt", FEED_VERSION].join(",") + "\n";
   return files;
