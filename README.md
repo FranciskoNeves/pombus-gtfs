@@ -4,7 +4,7 @@ Site estático (index.html) com o mapa da Linha 1 do Pombus (Pombal, Portugal), 
 
 ## Estado (21/10/2026)
 - 53 paragens com coordenadas reais fornecidas pelo utilizador.
-- 10 viagens oficiais (07:10–18:40), tempos ao segundo; paragens intermédias interpoladas por distância.
+- 10 viagens oficiais (07:10–18:40), tempos ao minuto (HH:MM:00); paragens intermédias interpoladas por distância.
 - Dois percursos na Charneca: A (via Lar Rainha Sta. Isabel) e B (via Centro Recreativo); Casarelo só nas viagens 08:10 e 15:42.
 - Calendário: ano inteiro de 2026, exceto sábados, domingos e feriados (nacionais + municipal de Pombal a 11/11) — calendar.txt + calendar_dates.txt.
 
