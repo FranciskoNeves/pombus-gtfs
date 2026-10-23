@@ -98,7 +98,7 @@ const SERVICE = { service_id: "escolar", start_date: "20260101", end_date: "2026
 // Feriados 2026: nacionais + municipal de Pombal (11/11, São Martinho) — removidos via calendar_dates.txt
 const HOLIDAYS = ["20260101","20260403","20260405","20260425","20260501","20260604","20260610","20260815","20261005","20261101","20261111","20261201","20261208","20261225"];
 const ROUTE = { route_id: "L1", short_name: "1", long_name: "Linha 1 - Azul", color: "0072BC", text_color: "FFFFFF", route_type: 3 };
-const FEED_VERSION = "2026-10-22-escola-volta";
+const FEED_VERSION = "2026-10-23-casarelo-volta";
 
 // Paragens por ordem de rota (coordenadas WGS84 fornecidas pelo utilizador)
 const STOPS = [
@@ -161,7 +161,7 @@ const STOPS = [
 /* Viagens — cada viagem lista APENAS as paragens que serve:
    [índice, "HH:MM"] chegada = partida · [índice, "chegada", "partida"] quando diferem.
    pattern A = via Lar Rainha Sta. Isabel · pattern B = via Centro Recreativo (salta P42–P52).
-   Casarelo (P05) só nas viagens 08:10 e 15:42 (desvio) · Escola M. de Pombal (volta, P22) só nas primeiras 6 viagens. */
+   Casarelo (P05) só nas viagens 08:10 e 15:42 (desvio) · Escola M. de Pombal (volta, P22) só nas primeiras 6 viagens · Casarelo (volta, P23) só nas viagens 08:10, 16:45 e 18:40 (08:45, 17:07, 19:03). */
 const TRIPS = [
   { id: "L1-0710", pattern: "A", head: "Circular via Lar Rainha Sta. Isabel", stops: [
     [0,"07:10"],
@@ -185,7 +185,6 @@ const TRIPS = [
     [19,"07:29"],
     [20,"07:32"],
     [21,"07:32"],
-    [22,"07:33"],
     [23,"07:34"],
     [24,"07:34"],
     [25,"07:35","07:36"],
@@ -240,7 +239,7 @@ const TRIPS = [
     [19,"08:37"],
     [20,"08:40"],
     [21,"08:40"],
-    [22,"08:44"],
+    [22,"08:45"],
     [23,"08:48"],
     [24,"08:49"],
     [25,"08:50"],
@@ -284,7 +283,6 @@ const TRIPS = [
     [19,"09:19"],
     [20,"09:22"],
     [21,"09:22"],
-    [22,"09:23"],
     [23,"09:24"],
     [24,"09:24"],
     [25,"09:25","09:26"],
@@ -338,7 +336,6 @@ const TRIPS = [
     [19,"11:19"],
     [20,"11:22"],
     [21,"11:22"],
-    [22,"11:23"],
     [23,"11:24"],
     [24,"11:24"],
     [25,"11:25","11:26"],
@@ -382,7 +379,6 @@ const TRIPS = [
     [19,"12:19"],
     [20,"12:22"],
     [21,"12:22"],
-    [22,"12:23"],
     [23,"12:24"],
     [24,"12:24"],
     [25,"12:25","12:26"],
@@ -436,7 +432,6 @@ const TRIPS = [
     [19,"13:49"],
     [20,"13:52"],
     [21,"13:52"],
-    [22,"13:53"],
     [23,"13:54"],
     [24,"13:54"],
     [25,"13:55","13:56"],
@@ -490,7 +485,6 @@ const TRIPS = [
     [18,"16:06"],
     [19,"16:08"],
     [20,"16:10"],
-    [22,"16:10"],
     [23,"16:11"],
     [24,"16:11"],
     [25,"16:12","16:13"],
@@ -540,11 +534,11 @@ const TRIPS = [
     [15,"16:59"],
     [16,"17:01"],
     [17,"17:02"],
-    [18,"17:03"],
-    [19,"17:05"],
-    [20,"17:09"],
-    [22,"17:10"],
-    [23,"17:11"],
+    [18,"17:02"],
+    [19,"17:04"],
+    [20,"17:06"],
+    [22,"17:07"],
+    [23,"17:10"],
     [24,"17:11"],
     [25,"17:12","17:13"],
     [26,"17:14"],
@@ -596,7 +590,6 @@ const TRIPS = [
     [18,"17:59"],
     [19,"18:01"],
     [20,"18:03"],
-    [22,"18:04"],
     [23,"18:04"],
     [24,"18:04"],
     [25,"18:05","18:06"],
@@ -638,9 +631,9 @@ const TRIPS = [
     [17,"18:56"],
     [18,"18:57"],
     [19,"18:59"],
-    [20,"19:05"],
-    [22,"19:06"],
-    [23,"19:07"],
+    [20,"19:01"],
+    [22,"19:03"],
+    [23,"19:06"],
     [24,"19:07"],
     [25,"19:08","19:09"],
     [26,"19:10"],
