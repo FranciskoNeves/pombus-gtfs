@@ -1,2 +1,2 @@
 feed_publisher_name,feed_publisher_url,feed_lang,feed_version
-"Pombus - Câmara Municipal de Pombal",https://www.cm-pombal.pt/servicos/pombus,pt,2026-10-24-governos4-coord
+"Pombus - Câmara Municipal de Pombal",https://www.cm-pombal.pt/servicos/pombus,pt,2026-10-24-governos5-coord
