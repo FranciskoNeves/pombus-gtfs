@@ -98,7 +98,8 @@ const SERVICE = { service_id: "escolar", start_date: "20260101", end_date: "2026
 // Feriados 2026: nacionais + municipal de Pombal (11/11, São Martinho) — removidos via calendar_dates.txt
 const HOLIDAYS = ["20260101","20260403","20260405","20260425","20260501","20260604","20260610","20260815","20261005","20261101","20261111","20261201","20261208","20261225"];
 const ROUTE = { route_id: "L1", short_name: "1", long_name: "Linha 1 - Azul", color: "0072BC", text_color: "FFFFFF", route_type: 3 };
-const FEED_VERSION = "2026-10-24-shapes-l1b";
+const FEED_VERSION = "2026-10-25-feed-info";
+const FEED_CONTACT = { email: "geral@cm-pombal.pt", url: "https://www.cm-pombal.pt/servicos/pombus" };
 
 // Paragens por ordem de rota (coordenadas WGS84 fornecidas pelo utilizador)
 const STOPS = [
@@ -8047,8 +8048,8 @@ function gtfsFiles() {
     [SERVICE.service_id, 1, 1, 1, 1, 1, 0, 0, SERVICE.start_date, SERVICE.end_date].join(",") + "\n";
   files["calendar_dates.txt"] = "service_id,date,exception_type\n" +
     HOLIDAYS.map(d => [SERVICE.service_id, d, 2].join(",")).join("\n") + "\n";
-  files["feed_info.txt"] = "feed_publisher_name,feed_publisher_url,feed_lang,feed_version\n" +
-    ['"' + AGENCY.agency_name + '"', AGENCY.agency_url, "pt", FEED_VERSION].join(",") + "\n";
+  files["feed_info.txt"] = "feed_publisher_name,feed_publisher_url,feed_lang,feed_start_date,feed_end_date,feed_version,feed_contact_email,feed_contact_url\n" +
+    ['"' + AGENCY.agency_name + '"', AGENCY.agency_url, "pt", SERVICE.start_date, SERVICE.end_date, FEED_VERSION, FEED_CONTACT.email, FEED_CONTACT.url].join(",") + "\n";
   return files;
 }
 
