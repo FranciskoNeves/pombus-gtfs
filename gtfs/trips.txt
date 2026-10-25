@@ -8,4 +8,4 @@ L1,escolar,L1-1330,"Circular via Lar Rainha Sta. Isabel",0,L1-A
 L1,escolar,L1-1542,"Circular via Lar Rainha Sta. Isabel",0,L1-A-desvio
 L1,escolar,L1-1645,"Circular via Lar Rainha Sta. Isabel",0,L1-A-casvolt
 L1,escolar,L1-1742,"Circular via Centro Recreativo",0,L1-B
-L1,escolar,L1-1840,"Circular via Centro Recreativo",0,L1-B
+L1,escolar,L1-1840,"Circular via Centro Recreativo",0,L1-B-casvolt
