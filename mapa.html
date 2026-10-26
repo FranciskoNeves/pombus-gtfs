@@ -15,6 +15,7 @@
   h1 .dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: #0072BC; margin-right: 6px; }
   #routename { color: #333; font-size: 14px; margin-top: 2px; }
   #feedmeta { color: #666; font-size: 12px; margin-top: 8px; line-height: 1.5; }
+  .linkbtn { background: none; border: 0; color: #0072BC; padding: 2px 0; text-decoration: underline; cursor: pointer; font-size: 12px; margin-top: 6px; }
   .box { background: #fff; border: 1px solid #e2e4e8; border-radius: 8px; padding: 10px 12px; margin-top: 12px; }
   .lbl { font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: .4px; }
   select, button { font: inherit; }
@@ -38,6 +39,7 @@
   .pop-times { margin-top: 4px; }
   .pop-times span { display: inline-block; margin: 1px 3px 1px 0; padding: 0 6px; border-radius: 4px; background: #eef4fa; color: #0072BC; font-weight: 600; }
   #overlay { position: fixed; inset: 0; background: rgba(0,0,0,.5); display: flex; align-items: center; justify-content: center; z-index: 2000; }
+  #overlay[hidden] { display: none; }
   #filebox { background: #fff; border-radius: 10px; padding: 24px 28px; max-width: 520px; line-height: 1.6; }
   #filebox pre { background: #f0f2f5; padding: 8px 12px; border-radius: 6px; overflow-x: auto; }
   @media (max-width: 720px) { #app { flex-direction: column; } #side { width: 100%; max-height: 45%; } #map { min-height: 55%; } }
@@ -49,6 +51,7 @@
     <h1><span class="dot"></span>Pombus</h1>
     <div id="routename"></div>
     <div id="feedmeta"></div>
+    <button id="reload" class="linkbtn">recarregar ficheiros GTFS…</button>
 
     <section class="box">
       <div class="lbl">Viagem</div>
@@ -371,9 +374,9 @@ function buildHeader() {
 
 function buildMap() {
   map = L.map('map', { preferCanvas: true }).setView([39.9159, -8.6283], 14);
-  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
     maxZoom: 19,
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://carto.com/attributions">CARTO</a>'
   }).addTo(map);
   layers.shape = L.layerGroup();
   layers.stops = L.layerGroup();
@@ -597,6 +600,11 @@ document.getElementById('play').addEventListener('click', function () {
 });
 document.getElementById('speed').addEventListener('change', function () {
   if (sim) { sim.wall0 = performance.now() - sim.elapsedWall; }
+});
+
+document.getElementById('reload').addEventListener('click', function () {
+  document.getElementById('pickerr').textContent = '';
+  document.getElementById('overlay').hidden = false;
 });
 
 var picker = document.getElementById('pick');

@@ -18,7 +18,7 @@ Site estático (index.html) com o mapa da Linha 1 do Pombus (Pombal, Portugal), 
 - Mostra o feed GTFS lido diretamente da pasta gtfs/: traçado da viagem selecionada, paragens com horários de passagem (popup com todas as viagens que servem cada paragem), camada com todos os traçados e todas as paragens, horário da viagem e simulação animada do autocarro ao longo do traçado (15× a 120×).
 - Requer um servidor local (o browser bloqueia a leitura de ficheiros em file://):
   1. Na raiz do repositório: `python3 -m http.server 8000`
-  2. Abrir http://localhost:8000/mapa.html (requer internet para os tiles do OpenStreetMap).
+  2. Abrir http://localhost:8000/mapa.html (requer internet para os tiles do mapa — dados OpenStreetMap servidos pelo CDN da CARTO, porque o servidor de tiles direto do OSM bloqueia pedidos sem referer como os de file://).
 - Alternativa sem servidor: abrir mapa.html e, no diálogo que aparece, selecionar manualmente os 9 ficheiros .txt da pasta gtfs/.
 - Nota: nas viagens com traçado L1-A, o site avisa que Governos 2 (~104 m) e o R. do Lagar (~259 m, vaivém do traçado) ficam longe do traçado desenhado — são as mesmas imprecisões conhecidas do validador GTFS, não erros do visualizador.
 
