@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pombus — Mapa GTFS</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  #app { display: flex; height: 100%; }
+  #side { width: 360px; min-width: 300px; overflow-y: auto; background: #f7f8fa; border-right: 1px solid #ddd; padding: 14px; }
+  #map { flex: 1; height: 100%; }
+  h1 { margin: 0; font-size: 22px; letter-spacing: .5px; }
+  h1 .dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: #0072BC; margin-right: 6px; }
+  #routename { color: #333; font-size: 14px; margin-top: 2px; }
+  #feedmeta { color: #666; font-size: 12px; margin-top: 8px; line-height: 1.5; }
+  .box { background: #fff; border: 1px solid #e2e4e8; border-radius: 8px; padding: 10px 12px; margin-top: 12px; }
+  .lbl { font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: .4px; }
+  select, button { font: inherit; }
+  select { width: 100%; margin: 4px 0 8px; padding: 6px; border: 1px solid #ccc; border-radius: 6px; background: #fff; }
+  #tripinfo { font-size: 13px; color: #333; line-height: 1.6; }
+  .row { display: flex; align-items: center; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+  button { padding: 6px 12px; border: 0; border-radius: 6px; background: #0072BC; color: #fff; cursor: pointer; }
+  button.on { background: #d9534f; }
+  #speed { width: auto; margin: 0; }
+  #clock { font-variant-numeric: tabular-nums; font-weight: 600; }
+  .chk, .toggles label { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #333; margin: 3px 0; cursor: pointer; }
+  #horario { max-height: 40vh; overflow-y: auto; margin-top: 6px; }
+  .hrow { display: flex; gap: 8px; padding: 4px 6px; border-radius: 6px; cursor: pointer; font-size: 13px; }
+  .hrow:hover { background: #eef4fa; }
+  .hrow.active { background: #d7e7f7; }
+  .ht { font-variant-numeric: tabular-nums; color: #0072BC; font-weight: 600; white-space: nowrap; }
+  .hn { color: #333; overflow: hidden; text-overflow: ellipsis; }
+  .legend { font-size: 12px; color: #666; }
+  .badge { display: inline-block; padding: 0 6px; border-radius: 10px; font-size: 11px; font-weight: 700; color: #fff; background: #0072BC; margin-left: 4px; }
+  .leaflet-popup-content { font-size: 13px; line-height: 1.5; }
+  .pop-times { margin-top: 4px; }
+  .pop-times span { display: inline-block; margin: 1px 3px 1px 0; padding: 0 6px; border-radius: 4px; background: #eef4fa; color: #0072BC; font-weight: 600; }
+  #overlay { position: fixed; inset: 0; background: rgba(0,0,0,.5); display: flex; align-items: center; justify-content: center; z-index: 2000; }
+  #filebox { background: #fff; border-radius: 10px; padding: 24px 28px; max-width: 520px; line-height: 1.6; }
+  #filebox pre { background: #f0f2f5; padding: 8px 12px; border-radius: 6px; overflow-x: auto; }
+  @media (max-width: 720px) { #app { flex-direction: column; } #side { width: 100%; max-height: 45%; } #map { min-height: 55%; } }
+</style>
+</head>
+<body>
+<div id="app">
+  <aside id="side">
+    <h1><span class="dot"></span>Pombus</h1>
+    <div id="routename"></div>
+    <div id="feedmeta"></div>
+
+    <section class="box">
+      <div class="lbl">Viagem</div>
+      <select id="trip"></select>
+      <div id="tripinfo"></div>
+      <div class="row">
+        <button id="play">Simular</button>
+        <select id="speed">
+          <option value="15">15×</option>
+          <option value="30">30×</option>
+          <option value="60" selected>60×</option>
+          <option value="120">120×</option>
+        </select>
+        <span id="clock">--:--:--</span>
+        <label class="chk"><input type="checkbox" id="follow"> seguir</label>
+      </div>
+    </section>
+
+    <section class="box toggles">
+      <label><input type="checkbox" id="tShape" checked> Traçado da viagem</label>
+      <label><input type="checkbox" id="tStops" checked> Paragens da viagem</label>
+      <label><input type="checkbox" id="tAllStops"> Todas as paragens</label>
+      <label><input type="checkbox" id="tAllShapes"> Todos os traçados</label>
+    </section>
+
+    <section class="box">
+      <div class="lbl">Horário da viagem</div>
+      <div id="horario"></div>
+    </section>
+  </aside>
+  <main id="map"></main>
+</div>
+
+<div id="overlay" hidden>
+  <div id="filebox">
+    <h2 style="margin-top:0">Não foi possível carregar o feed GTFS</h2>
+    <p>Esta página lê os ficheiros da pasta <code>gtfs/</code>. Abrida diretamente do disco (URL <code>file://</code>) o browser bloqueia a leitura. Corre um servidor local na raiz do repositório e abre <code>http://localhost:8000/mapa.html</code>:</p>
+    <pre>python3 -m http.server 8000</pre>
+    <p>Alternativa sem servidor: seleciona manualmente os 9 ficheiros <code>.txt</code> da pasta <code>gtfs/</code>:</p>
+    <input type="file" id="pick" multiple accept=".txt">
+    <div id="pickerr" style="color:#c0392b"></div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+'use strict';
+
+// ===PURE-START===
+function parseCSV(text) {
+  const rows = []; let row = [], field = '', inQ = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (inQ) {
+      if (c === '"') {
+        if (text[i + 1] === '"') { field += '"'; i++; } else { inQ = false; }
+      } else field += c;
+    } else if (c === '"') inQ = true;
+    else if (c === ',') { row.push(field); field = ''; }
+    else if (c === '\n') { row.push(field); field = ''; rows.push(row); row = []; }
+    else if (c !== '\r') field += c;
+  }
+  if (field !== '' || row.length !== 0) { row.push(field); rows.push(row); }
+  while (rows.length && rows[rows.length - 1].join('') === '') rows.pop();
+  return rows;
+}
+
+function csvObjects(text) {
+  const rows = parseCSV(text);
+  if (!rows.length) return [];
+  const head = rows[0];
+  return rows.slice(1).map(r => {
+    const o = {};
+    for (let i = 0; i < head.length; i++) o[head[i]] = r[i] !== undefined ? r[i] : '';
+    return o;
+  });
+}
+
+function toSec(t) {
+  if (!t) return 0;
+  const p = String(t).split(':').map(Number);
+  return (p[0] || 0) * 3600 + (p[1] || 0) * 60 + (p[2] || 0);
+}
+
+function hhmm(sec) { return pad2(Math.floor(sec / 3600)) + ':' + pad2(Math.floor(sec / 60) % 60); }
+function hhmmss(sec) { return hhmm(sec) + ':' + pad2(Math.floor(sec) % 60); }
+function pad2(n) { return (n < 10 ? '0' : '') + n; }
+
+function havM(lat1, lon1, lat2, lon2) {
+  const R = 6371000, rad = Math.PI / 180;
+  const dLat = (lat2 - lat1) * rad, dLon = (lon2 - lon1) * rad;
+  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * rad) * Math.cos(lat2 * rad) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  return 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+function buildModel(files) {
+  const routes = csvObjects(files['routes.txt'] || '');
+  const stops = csvObjects(files['stops.txt'] || '');
+  const trips = csvObjects(files['trips.txt'] || '');
+  const stopTimesRaw = csvObjects(files['stop_times.txt'] || '');
+  const calendar = csvObjects(files['calendar.txt'] || '');
+  const calDates = csvObjects(files['calendar_dates.txt'] || '');
+  const feedInfo = csvObjects(files['feed_info.txt'] || '');
+  const agency = csvObjects(files['agency.txt'] || '');
+
+  const shapesTmp = {};
+  csvObjects(files['shapes.txt'] || '').forEach(r => {
+    const id = r.shape_id;
+    if (!shapesTmp[id]) shapesTmp[id] = [];
+    shapesTmp[id].push({ seq: +r.shape_pt_sequence, lat: +r.shape_pt_lat, lon: +r.shape_pt_lon });
+  });
+  const shapes = {};
+  const shapeLen = {};
+  for (const id in shapesTmp) {
+    shapesTmp[id].sort((a, b) => a.seq - b.seq);
+    shapes[id] = shapesTmp[id].map(p => [p.lat, p.lon]);
+    let m = 0;
+    for (let i = 1; i < shapes[id].length; i++) m += havM(shapes[id][i - 1][0], shapes[id][i - 1][1], shapes[id][i][0], shapes[id][i][1]);
+    shapeLen[id] = m;
+  }
+
+  const stopMap = {};
+  stops.forEach(s => { stopMap[s.stop_id] = { id: s.stop_id, name: s.stop_name, lat: +s.stop_lat, lon: +s.stop_lon }; });
+
+  const tripsById = {};
+  trips.forEach(t => {
+    t.pattern = /Centro Recreativo/i.test(t.trip_headsign || '') ? 'B' : 'A';
+    tripsById[t.trip_id] = t;
+  });
+
+  const stByTrip = {};
+  stopTimesRaw.forEach(r => {
+    if (!stByTrip[r.trip_id]) stByTrip[r.trip_id] = [];
+    stByTrip[r.trip_id].push({ stopId: r.stop_id, arr: toSec(r.arrival_time), dep: toSec(r.departure_time), seq: +r.stop_sequence });
+  });
+  for (const id in stByTrip) stByTrip[id].sort((a, b) => a.seq - b.seq);
+
+  const byStop = {};
+  stopTimesRaw.forEach(r => {
+    if (!byStop[r.stop_id]) byStop[r.stop_id] = [];
+    byStop[r.stop_id].push({ tripId: r.trip_id, arr: toSec(r.arrival_time), dep: toSec(r.departure_time) });
+  });
+  for (const id in byStop) byStop[id].sort((a, b) => a.dep - b.dep);
+
+  const routeById = {};
+  routes.forEach(r => routeById[r.route_id] = r);
+
+  return {
+    agency, routes, routeById, calendar, calDates, feedInfo,
+    stopMap, trips, tripsById, stByTrip, byStop, shapes, shapeLen,
+    stats: { stops: stops.length, trips: trips.length, stopTimes: stopTimesRaw.length, shapes: Object.keys(shapes).length }
+  };
+}
+
+// Maps each stop_time of a trip to a shape point: the FIRST point of the shape
+// (searching forward from the previous stop) that comes within ~40 m of the
+// stop; falls back to the nearest point from the cursor on. Scanning forward
+// only keeps stop order along the shape and avoids jumping to later passages
+// of streets the route traverses twice (ida/volta).
+function mapTripToShape(model, tripId) {
+  const trip = model.tripsById[tripId];
+  const shape = (trip && model.shapes[trip.shape_id]) || [];
+  const sts = model.stByTrip[tripId] || [];
+  const NEAR2 = Math.pow(40 / 111320, 2); // ~40 m, squared, in degree units
+  let cursor = 0;
+  const mapped = sts.map(st => {
+    const s = model.stopMap[st.stopId];
+    const k = Math.cos(s.lat * Math.PI / 180);
+    const dist2 = function (i) {
+      const dx = (shape[i][1] - s.lon) * k, dy = shape[i][0] - s.lat;
+      return dx * dx + dy * dy;
+    };
+    let best = -1, bestD = Infinity, near = -1;
+    for (let i = cursor; i < shape.length; i++) {
+      const d = dist2(i);
+      if (d < bestD) { bestD = d; best = i; }
+      if (near === -1 && d <= NEAR2) { near = i; break; }
+    }
+    let idx;
+    if (near === -1) {
+      idx = best; // no close passage: take the nearest point from the cursor on
+    } else {
+      // local descent: walk forward while approaching the stop, so dips and
+      // the closest point of the passage win over the first 40 m crossing
+      idx = near;
+      let dPrev = dist2(near);
+      while (idx + 1 < shape.length) {
+        const dNext = dist2(idx + 1);
+        if (dNext <= dPrev) { idx++; dPrev = dNext; } else break;
+      }
+    }
+    if (idx < 0) return { stopId: st.stopId, arr: st.arr, dep: st.dep, seq: st.seq, idx: 0, distM: 0 };
+    cursor = idx;
+    return { stopId: st.stopId, arr: st.arr, dep: st.dep, seq: st.seq, idx: idx,
+             distM: havM(s.lat, s.lon, shape[idx][0], shape[idx][1]) };
+  });
+  return { mapped, shapeLen: shape.length };
+}
+
+// time (sec) at which the bus passes each shape point, interpolated between stops
+function buildTrack(mapped, shapeLen) {
+  const track = new Array(Math.max(1, shapeLen)).fill(0);
+  if (!mapped.length || !shapeLen) return track;
+  const first = mapped[0];
+  track.fill(first.dep, 0, first.idx + 1);
+  for (let i = 1; i < mapped.length; i++) {
+    const prev = mapped[i - 1], m = mapped[i];
+    if (m.idx > prev.idx) {
+      const span = m.idx - prev.idx, dt = Math.max(0, m.arr - prev.dep);
+      for (let j = prev.idx + 1; j <= m.idx; j++) track[j] = prev.dep + dt * ((j - prev.idx) / span);
+    } else {
+      track[m.idx] = m.arr;
+    }
+  }
+  const last = mapped[mapped.length - 1];
+  if (last.idx < shapeLen - 1) track.fill(last.arr, last.idx + 1);
+  return track;
+}
+
+function makePosFn(track, shape) {
+  let cur = 0;
+  return function (sec) {
+    const n = track.length;
+    while (cur < n - 1 && track[cur + 1] < sec) cur++;
+    while (cur > 0 && track[cur] > sec) cur--;
+    let lat, lon;
+    if (cur >= n - 1 || shape.length <= cur + 1) {
+      lat = shape[Math.min(cur, shape.length - 1)][0];
+      lon = shape[Math.min(cur, shape.length - 1)][1];
+    } else {
+      const dt = track[cur + 1] - track[cur];
+      const f = dt > 0 ? Math.min(1, Math.max(0, (sec - track[cur]) / dt)) : 0;
+      lat = shape[cur][0] + (shape[cur + 1][0] - shape[cur][0]) * f;
+      lon = shape[cur][1] + (shape[cur + 1][1] - shape[cur][1]) * f;
+    }
+    return { lat, lon, done: sec >= track[n - 1] };
+  };
+}
+
+function fmtDateGTFS(d) {
+  if (!d || d.length !== 8) return d || '';
+  return d.slice(6) + '-' + d.slice(4, 6) + '-' + d.slice(0, 4);
+}
+
+function serviceLabel(cal) {
+  if (!cal) return '';
+  const names = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
+  const keys = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+  const act = keys.map((k, i) => cal[k] === '1' ? names[i] : null).filter(Boolean);
+  return act.join(', ');
+}
+// ===PURE-END===
+
+var GTFS_NAMES = ['agency.txt', 'calendar.txt', 'calendar_dates.txt', 'feed_info.txt',
+                  'routes.txt', 'shapes.txt', 'stop_times.txt', 'stops.txt', 'trips.txt'];
+
+function esc(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function loadViaFetch() {
+  return Promise.all(GTFS_NAMES.map(n =>
+    fetch('gtfs/' + n).then(function (r) {
+      if (!r.ok) throw new Error(n + ' (HTTP ' + r.status + ')');
+      return r.text().then(function (t) { return [n, t]; });
+    })
+  )).then(function (pairs) {
+    const files = {};
+    pairs.forEach(function (p) { files[p[0]] = p[1]; });
+    return files;
+  });
+}
+
+function loadViaPicker(fileList) {
+  const files = {};
+  const missing = GTFS_NAMES.slice();
+  let list = Array.prototype.slice.call(fileList);
+  return Promise.all(list.map(function (f) {
+    return f.text().then(function (t) {
+      const name = f.name.replace(/^gtfs\//, '');
+      files[name] = t;
+      const i = missing.indexOf(name);
+      if (i !== -1) missing.splice(i, 1);
+    });
+  })).then(function () {
+    if (missing.length) throw new Error('Faltam: ' + missing.join(', '));
+    return files;
+  });
+}
+
+var model, map, current = null;
+var layers = { shape: null, stops: null, allStops: null, allShapes: null, bus: null };
+var sim = null;
+
+function init(files) {
+  model = buildModel(files);
+  buildHeader();
+  buildMap();
+  buildTripSelect();
+  buildToggles();
+  document.getElementById('trip').addEventListener('change', function () { selectTrip(this.value); });
+  selectTrip(document.getElementById('trip').value);
+}
+
+function buildHeader() {
+  var route = model.routes[0] || {};
+  document.getElementById('routename').textContent =
+    (route.route_long_name || '') + (route.route_short_name ? '  ·  nº ' + route.route_short_name : '');
+  var fi = model.feedInfo[0] || {};
+  var cal = model.calendar[0] || {};
+  document.getElementById('feedmeta').innerHTML =
+    esc('Feed ' + (fi.feed_version || '?')) + '<br>' +
+    esc(model.stats.trips + ' viagens · ' + model.stats.stops + ' paragens · ' +
+        model.stats.shapes + ' traçados · ' + model.stats.stopTimes + ' horários') + '<br>' +
+    esc('Serviço "' + (cal.service_id || '') + '": ' + serviceLabel(cal) + ', ' +
+        fmtDateGTFS(cal.start_date) + ' a ' + fmtDateGTFS(cal.end_date)) +
+    (model.calDates.length ? esc(' · ' + model.calDates.length + ' exceções (feriados)') : '');
+}
+
+function buildMap() {
+  map = L.map('map', { preferCanvas: true }).setView([39.9159, -8.6283], 14);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+  }).addTo(map);
+  layers.shape = L.layerGroup();
+  layers.stops = L.layerGroup();
+  layers.allStops = L.layerGroup();
+  layers.allShapes = L.layerGroup();
+}
+
+function routeColor() {
+  var r = model.routes[0] || {};
+  return r.route_color ? '#' + r.route_color : '#0072BC';
+}
+
+function stopPopupHtml(stopId, highlightTripId) {
+  var s = model.stopMap[stopId];
+  var entries = model.byStop[stopId] || [];
+  var times = entries.map(function (e) {
+    var tr = model.tripsById[e.tripId] || {};
+    var cls = e.tripId === highlightTripId ? ' style="background:#0072BC;color:#fff"' : '';
+    var pat = tr.pattern ? ' <small>' + tr.pattern + '</small>' : '';
+    return '<span' + cls + ' title="' + esc(tr.trip_headsign || '') + '">' + hhmm(e.dep) + pat + '</span>';
+  }).join('');
+  return '<strong>' + esc(s.name) + '</strong><br><span class="legend">' + esc(s.id) + ' · ' +
+    s.lat.toFixed(5) + ', ' + s.lon.toFixed(5) + '</span>' +
+    (times ? '<div class="pop-times">' + times + '</div>' : '') +
+    '<div class="legend">' + entries.length + ' passagens/dia</div>';
+}
+
+function markerFor(stopId, opts) {
+  var s = model.stopMap[stopId];
+  return L.circleMarker([s.lat, s.lon], Object.assign({
+    radius: 6, color: routeColor(), weight: 2, fillColor: '#ffffff', fillOpacity: 1
+  }, opts || {}));
+}
+
+function buildTripSelect() {
+  var sel = document.getElementById('trip');
+  sel.innerHTML = '';
+  var ordered = model.trips.slice().sort(function (a, b) {
+    var ta = model.stByTrip[a.trip_id], tb = model.stByTrip[b.trip_id];
+    var da = ta && ta.length ? ta[0].dep : 0, db = tb && tb.length ? tb[0].dep : 0;
+    return da - db;
+  });
+  ordered.forEach(function (t) {
+    var st = model.stByTrip[t.trip_id] || [];
+    var label = '';
+    if (st.length) label = hhmm(st[0].dep) + ' → ' + hhmm(st[st.length - 1].arr) + '  ·  ' + t.trip_headsign;
+    else label = t.trip_id;
+    var o = document.createElement('option');
+    o.value = t.trip_id;
+    o.textContent = label + '  [' + t.pattern + ']';
+    sel.appendChild(o);
+  });
+}
+
+function buildToggles() {
+  function bind(id, layer) {
+    document.getElementById(id).addEventListener('change', function () {
+      if (this.checked) layer.addTo(map); else map.removeLayer(layer);
+    });
+  }
+  bind('tShape', layers.shape);
+  bind('tStops', layers.stops);
+  bind('tAllStops', layers.allStops);
+  bind('tAllShapes', layers.allShapes);
+
+  // all shapes (faint)
+  var c = routeColor();
+  Object.keys(model.shapes).forEach(function (sid) {
+    if (model.tripsById[current] && sid === model.tripsById[current].shape_id) return;
+    L.polyline(model.shapes[sid], { color: c, weight: 3, opacity: 0.18, dashArray: '6 8' })
+      .bindTooltip(esc(sid), { sticky: true })
+      .addTo(layers.allShapes);
+  });
+  // all stops (small grey)
+  Object.keys(model.stopMap).forEach(function (sid) {
+    markerFor(sid, { radius: 3.5, color: '#888', weight: 1, fillColor: '#ccc' })
+      .bindPopup(function () { return stopPopupHtml(sid, current); })
+      .bindTooltip(esc(model.stopMap[sid].name), { direction: 'top' })
+      .addTo(layers.allStops);
+  });
+  layers.shape.addTo(map);
+  layers.stops.addTo(map);
+}
+
+function clearSim() {
+  if (sim) {
+    if (sim.raf) cancelAnimationFrame(sim.raf);
+    if (layers.bus) { map.removeLayer(layers.bus); layers.bus = null; }
+    sim = null;
+  }
+  document.getElementById('play').textContent = 'Simular';
+  document.getElementById('play').classList.remove('on');
+  document.getElementById('clock').textContent = '--:--:--';
+}
+
+function selectTrip(tripId) {
+  clearSim();
+  current = tripId;
+  var trip = model.tripsById[tripId];
+  var sts = model.stByTrip[tripId] || [];
+  var shape = model.shapes[trip.shape_id] || [];
+  var mapping = mapTripToShape(model, tripId);
+
+  layers.shape.clearLayers();
+  layers.stops.clearLayers();
+
+  if (shape.length) {
+    L.polyline(shape, { color: routeColor(), weight: 5, opacity: 0.85 }).addTo(layers.shape);
+  }
+  var m = mapping.mapped;
+  var worst = 0;
+  sts.forEach(function (st, i) {
+    var sm = model.stopMap[st.stopId];
+    var mk = markerFor(st.stopId).addTo(layers.stops);
+    var t = hhmm(st.dep) + (st.arr !== st.dep ? '–' + hhmm(st.arr) : '');
+    mk.bindTooltip(t + ' · ' + esc(sm.name), { direction: 'top' });
+    mk.bindPopup(function () { return stopPopupHtml(st.stopId, tripId); });
+    if (m[i] && m[i].distM > worst) worst = m[i].distM;
+  });
+
+  document.getElementById('tripinfo').innerHTML =
+    esc(trip.trip_headsign || '') + ' <span class="badge">' + esc(trip.pattern) + '</span><br>' +
+    esc('Traçado: ' + (trip.shape_id || '—') +
+        (shape.length ? ' · ' + (model.shapeLen[trip.shape_id] / 1000).toFixed(1) + ' km' : '')) + '<br>' +
+    esc(sts.length + ' paragens · ' +
+        (sts.length ? hhmm(sts[0].dep) + ' → ' + hhmm(sts[sts.length - 1].arr) : '')) +
+    (worst > 60 ? '<br><span class="legend">aviso: ' + esc(model.stopMap[mapped.reduce(function (a2, x) { return x.distM > a2.distM ? x : a2; }, mapped[0]).stopId].name) +
+      ' fica a ' + Math.round(worst) + ' m do traçado desenhado</span>' : '');
+
+  // timetable
+  var hor = document.getElementById('horario');
+  hor.innerHTML = '';
+  sts.forEach(function (st, i) {
+    var sm = model.stopMap[st.stopId];
+    var row = document.createElement('div');
+    row.className = 'hrow';
+    row.dataset.i = i;
+    var t = hhmm(st.dep) + (st.arr !== st.dep ? '–' + hhmm(st.arr) : '');
+    row.innerHTML = '<span class="ht">' + t + '</span><span class="hn">' +
+      esc(sm.id + ' · ' + sm.name) + '</span>';
+    row.addEventListener('click', function () {
+      map.panTo([sm.lat, sm.lon]);
+      if (shape.length && m[i]) map.setView([shape[m[i].idx][0], shape[m[i].idx][1]], Math.max(map.getZoom(), 16));
+      markerFor(st.stopId, { radius: 8 })
+        .bindPopup(stopPopupHtml(st.stopId, tripId), { autoPan: false })
+        .addTo(map)
+        .openPopup([sm.lat, sm.lon])
+        .on('popupclose', function () { map.removeLayer(this); });
+    });
+    hor.appendChild(row);
+  });
+
+  if (shape.length) {
+    var bounds = L.latLngBounds(shape);
+    map.fitBounds(bounds.pad(0.05));
+  }
+}
+
+function startSim() {
+  var trip = model.tripsById[current];
+  var shape = model.shapes[trip.shape_id] || [];
+  if (!shape.length) return;
+  var mapping = mapTripToShape(model, current);
+  if (!mapping.mapped.length) return;
+  var track = buildTrack(mapping.mapped, mapping.shapeLen);
+  var t0 = track[0], t1 = track[track.length - 1];
+  var posFn = makePosFn(track, shape);
+  if (!layers.bus) {
+    layers.bus = L.marker([shape[0][0], shape[0][1]], { zIndexOffset: 1000 });
+  }
+  if (sim && sim.paused) {
+    // resume
+    sim.paused = false;
+    sim.wall0 = performance.now() - sim.elapsedWall;
+    loopSim();
+    return;
+  }
+  sim = { track: track, t0: t0, t1: t1, posFn: posFn, elapsed: 0, elapsedWall: 0, wall0: performance.now(), paused: false, raf: 0, rows: document.querySelectorAll('#horario .hrow') };
+  layers.bus.addTo(map);
+  loopSim();
+}
+
+function loopSim() {
+  if (!sim) return;
+  var speed = +document.getElementById('speed').value || 60;
+  var now = performance.now();
+  sim.elapsedWall = now - sim.wall0;
+  sim.elapsed = sim.elapsedWall / 1000 * speed;
+  var sec = sim.t0 + sim.elapsed;
+  if (sec >= sim.t1) {
+    var pEnd = sim.posFn(sim.t1);
+    layers.bus.setLatLng([pEnd.lat, pEnd.lon]);
+    document.getElementById('clock').textContent = hhmmss(sim.t1) + ' · fim';
+    clearSim();
+    return;
+  }
+  var p = sim.posFn(sec);
+  layers.bus.setLatLng([p.lat, p.lon]);
+  document.getElementById('clock').textContent = hhmmss(sec);
+  if (document.getElementById('follow').checked) map.setView([p.lat, p.lon], map.getZoom(), { animate: false });
+  // active timetable row: last stop with dep <= sec
+  var sts = model.stByTrip[current];
+  var active = -1;
+  for (var i = 0; i < sts.length; i++) if (sts[i].dep <= sec) active = i;
+  sim.rows.forEach(function (rowEl, idx) { rowEl.classList.toggle('active', idx === active); });
+  sim.raf = requestAnimationFrame(loopSim);
+}
+
+document.getElementById('play').addEventListener('click', function () {
+  if (sim && !sim.paused) {
+    if (sim.raf) cancelAnimationFrame(sim.raf);
+    sim.paused = true;
+    this.textContent = 'Continuar';
+    this.classList.add('on');
+    return;
+  }
+  this.textContent = 'Pausar';
+  this.classList.add('on');
+  startSim();
+});
+document.getElementById('speed').addEventListener('change', function () {
+  if (sim) { sim.wall0 = performance.now() - sim.elapsedWall; }
+});
+
+var picker = document.getElementById('pick');
+picker.addEventListener('change', function () {
+  document.getElementById('pickerr').textContent = '';
+  loadViaPicker(picker.files).then(function (files) {
+    document.getElementById('overlay').hidden = true;
+    init(files);
+  }).catch(function (e) {
+    document.getElementById('pickerr').textContent = 'Erro: ' + e.message;
+  });
+});
+
+loadViaFetch().then(function (files) {
+  init(files);
+}).catch(function (e) {
+  var overlay = document.getElementById('overlay');
+  overlay.hidden = false;
+  console.warn('Falha ao carregar gtfs/ via fetch:', e);
+});
+</script>
+</body>
+</html>
