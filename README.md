@@ -20,7 +20,7 @@ Site estático (index.html) com o mapa da Linha 1 do Pombus (Pombal, Portugal), 
   1. Na raiz do repositório: `python3 -m http.server 8000`
   2. Abrir http://localhost:8000/mapa.html (requer internet para os tiles do OpenStreetMap).
 - Alternativa sem servidor: abrir mapa.html e, no diálogo que aparece, selecionar manualmente os 9 ficheiros .txt da pasta gtfs/.
-- Nota: nas viagens com traçado L1-A, o site avisa que Governos 2 (~104 m) e o R. do Lagar (~259 m, vaivém do dipo) ficam longe do traçado desenhado — são as mesmas imprecisões conhecidas do validador GTFS, não erros do visualizador.
+- Nota: nas viagens com traçado L1-A, o site avisa que Governos 2 (~104 m) e o R. do Lagar (~259 m, vaivém do traçado) ficam longe do traçado desenhado — são as mesmas imprecisões conhecidas do validador GTFS, não erros do visualizador.
 
 ## Próximos passos
 - Outras 8 linhas do Pombus.
