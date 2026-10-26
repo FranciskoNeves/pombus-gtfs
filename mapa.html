@@ -466,11 +466,11 @@ function clearSim() {
   }
   document.getElementById('play').textContent = 'Simular';
   document.getElementById('play').classList.remove('on');
-  document.getElementById('clock').textContent = '--:--:--';
 }
 
 function selectTrip(tripId) {
   clearSim();
+  document.getElementById('clock').textContent = '--:--:--';
   current = tripId;
   var trip = model.tripsById[tripId];
   var sts = model.stByTrip[tripId] || [];
@@ -500,7 +500,7 @@ function selectTrip(tripId) {
         (shape.length ? ' · ' + (model.shapeLen[trip.shape_id] / 1000).toFixed(1) + ' km' : '')) + '<br>' +
     esc(sts.length + ' paragens · ' +
         (sts.length ? hhmm(sts[0].dep) + ' → ' + hhmm(sts[sts.length - 1].arr) : '')) +
-    (worst > 60 ? '<br><span class="legend">aviso: ' + esc(model.stopMap[mapped.reduce(function (a2, x) { return x.distM > a2.distM ? x : a2; }, mapped[0]).stopId].name) +
+    (worst > 60 ? '<br><span class="legend">aviso: ' + esc(model.stopMap[m.reduce(function (a2, x) { return x.distM > a2.distM ? x : a2; }, m[0]).stopId].name) +
       ' fica a ' + Math.round(worst) + ' m do traçado desenhado</span>' : '');
 
   // timetable
@@ -552,6 +552,7 @@ function startSim() {
     return;
   }
   sim = { track: track, t0: t0, t1: t1, posFn: posFn, elapsed: 0, elapsedWall: 0, wall0: performance.now(), paused: false, raf: 0, rows: document.querySelectorAll('#horario .hrow') };
+  document.getElementById('clock').textContent = hhmmss(t0);
   layers.bus.addTo(map);
   loopSim();
 }
