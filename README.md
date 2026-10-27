@@ -18,7 +18,7 @@ Site estático (index.html) com o mapa da Linha 1 do Pombus (Pombal, Portugal), 
 - Mostra o feed GTFS lido diretamente da pasta gtfs/: traçado da viagem selecionada, paragens com horários de passagem (popup com todas as viagens que servem cada paragem), camada com todos os traçados e todas as paragens, horário da viagem.
 - Requer um servidor local (o browser bloqueia a leitura de ficheiros em file://):
   1. Na raiz do repositório: `python3 -m http.server 8000`
-  2. Abrir http://localhost:8000/mapa.html (requer internet para os tiles do mapa). Tiles: Esri World Street Map (gratuito, sem chave, sem bloqueios de utilização leve — ao contrário do tile.openstreetmap.org, que bloqueia com imagens «Access blocked», e da CARTO, que passou a exigir API key). Leaflet em si é livre e não requer chave nenhuma; só o fundo de mapa vem de um servidor de tiles terceiro.
+  2. Abrir http://localhost:8000/mapa.html (requer internet para os tiles do mapa). Tiles: OSM Deutschland (tile.openstreetmap.de — dados OpenStreetMap servidos pelo servidor comunitário alemão, gratuito, sem chave; ao contrário do tile.openstreetmap.org, que bloqueia com imagens «Access blocked», e da CARTO, que passou a exigir API key). Leaflet em si é livre e não requer chave nenhuma; só o fundo de mapa vem de um servidor de tiles terceiro.
 - Alternativa sem servidor: abrir mapa.html e, no diálogo que aparece, selecionar manualmente os 9 ficheiros .txt da pasta gtfs/.
 - Nota: nas viagens com traçado L1-A, o site avisa que Governos 2 (~104 m) e o R. do Lagar (~259 m, vaivém do traçado) ficam longe do traçado desenhado — são as mesmas imprecisões conhecidas do validador GTFS, não erros do visualizador.
 
