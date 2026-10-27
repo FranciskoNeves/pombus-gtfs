@@ -372,12 +372,44 @@ function buildHeader() {
     (model.calDates.length ? esc(' · ' + model.calDates.length + ' exceções (feriados)') : '');
 }
 
+var TILE_PROVIDERS = [
+  { name: 'OpenStreetMap',
+    url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' },
+  { name: 'OSM Deutschland',
+    url: 'https://tile.openstreetmap.de/{z}/{x}/{y}.png',
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' },
+  { name: 'OpenTopoMap',
+    url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
+    attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, SRTM | Style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (CC-BY-SA)' },
+  { name: 'CARTO Voyager',
+    url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://carto.com/attributions">CARTO</a>' },
+  { name: 'Esri',
+    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
+    attribution: 'Tiles &copy; Esri' }
+];
+var tileLayer = null, tileIdx = 0, tileErrs = 0;
+
+function addTileLayer() {
+  var p = TILE_PROVIDERS[tileIdx];
+  tileErrs = 0;
+  tileLayer = L.tileLayer(p.url, { maxZoom: 19, attribution: p.attribution });
+  tileLayer.on('tileerror', function () {
+    tileErrs++;
+    // blocked or key-required provider: switch to the next free one
+    if (tileErrs >= 6 && tileIdx < TILE_PROVIDERS.length - 1) {
+      map.removeLayer(tileLayer);
+      tileIdx++;
+      addTileLayer();
+    }
+  });
+  tileLayer.addTo(map);
+}
+
 function buildMap() {
   map = L.map('map', { preferCanvas: true }).setView([39.9159, -8.6283], 14);
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-    maxZoom: 19,
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://carto.com/attributions">CARTO</a>'
-  }).addTo(map);
+  addTileLayer();
   layers.shape = L.layerGroup();
   layers.stops = L.layerGroup();
   layers.allStops = L.layerGroup();
