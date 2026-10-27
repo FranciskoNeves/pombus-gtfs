@@ -52,6 +52,7 @@
     <div id="routename"></div>
     <div id="feedmeta"></div>
     <button id="reload" class="linkbtn">recarregar ficheiros GTFS…</button>
+    <button id="tiles" class="linkbtn">mapa de fundo: …</button>
 
     <section class="box">
       <div class="lbl">Viagem</div>
@@ -389,15 +390,78 @@ var TILE_PROVIDERS = [
     url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
     attribution: 'Tiles &copy; Esri' }
 ];
-var tileLayer = null, tileIdx = 0, tileErrs = 0;
+var tileLayer = null, tileIdx = 0, tileErrs = 0, tileToken = 0;
+
+// Since 2025 tile.openstreetmap.org answers usage-policy blocks with a valid
+// "Access blocked" PNG and HTTP 200 (x-blocked header), so Leaflet never fires
+// 'tileerror' and a fallback chain keyed on errors alone never triggers. Each
+// provider is therefore also probed: one tile is fetched/read via CORS, drawn
+// to a canvas and fingerprinted; a block image skips the provider.
+var PROBE_Z = 15, PROBE_LAT = 39.9159, PROBE_LON = -8.6283; // Pombal
+
+function probeUrl(p) {
+  var n = Math.pow(2, PROBE_Z);
+  var x = Math.floor((PROBE_LON + 180) / 360 * n);
+  var latRad = PROBE_LAT * Math.PI / 180;
+  var y = Math.floor((1 - Math.log(Math.tan(latRad) + 1 / Math.cos(latRad)) / Math.PI) / 2 * n);
+  return p.url.replace('{s}', 'a').replace('{z}', String(PROBE_Z))
+              .replace('{x}', String(x)).replace('{y}', String(y)).replace('{r}', '');
+}
+
+// fingerprint of the block tile: a page that is almost all pure white with
+// some dark text (real map tiles are never like that)
+function tileLooksBlocked(img) {
+  try {
+    var w = img.naturalWidth || 256, h = img.naturalHeight || 256;
+    var c = document.createElement('canvas');
+    c.width = w; c.height = h;
+    var ctx = c.getContext('2d');
+    if (!ctx || !ctx.drawImage || !ctx.getImageData) return false;
+    ctx.drawImage(img, 0, 0);
+    var d = ctx.getImageData(0, 0, w, h).data;
+    var white = 0, dark = 0, n = 0;
+    for (var i = 0; i < d.length; i += 16) { // every 4th pixel
+      n++;
+      if (d[i] >= 248 && d[i + 1] >= 248 && d[i + 2] >= 248) white++;
+      else if (d[i] <= 100 && d[i + 1] <= 100 && d[i + 2] <= 100) dark++;
+    }
+    return n > 0 && white / n >= 0.8 && dark / n >= 0.005;
+  } catch (e) { return false; } // tainted canvas or no 2d context: cannot tell
+}
+
+function imageProbe(p) {
+  return new Promise(function (resolve) {
+    var img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = function () { resolve(tileLooksBlocked(img)); };
+    img.onerror = function () { resolve(false); }; // real errors -> tileerror path
+    img.src = probeUrl(p);
+  });
+}
+
+function probeProvider(p) {
+  // 1) fetch: OSM marks policy blocks with an x-blocked response header
+  return fetch(probeUrl(p)).then(function (r) {
+    if (r && r.headers && r.headers.get && r.headers.get('x-blocked')) return true;
+    return imageProbe(p); // 2) canvas fingerprint of the tile image
+  }).catch(function () {
+    return imageProbe(p);
+  });
+}
+
+function updateTileBtn() {
+  var b = document.getElementById('tiles');
+  if (b) b.textContent = 'mapa de fundo: ' + ((TILE_PROVIDERS[tileIdx] || {}).name || '—');
+}
 
 function addTileLayer() {
+  var my = ++tileToken;
   var p = TILE_PROVIDERS[tileIdx];
   tileErrs = 0;
   tileLayer = L.tileLayer(p.url, { maxZoom: 19, attribution: p.attribution });
   tileLayer.on('tileerror', function () {
     tileErrs++;
-    // blocked or key-required provider: switch to the next free one
+    // provider refusing with real HTTP errors (403 / key): next free one
     if (tileErrs >= 6 && tileIdx < TILE_PROVIDERS.length - 1) {
       map.removeLayer(tileLayer);
       tileIdx++;
@@ -405,6 +469,23 @@ function addTileLayer() {
     }
   });
   tileLayer.addTo(map);
+  updateTileBtn();
+  // in parallel, probe for blocks served as valid images (HTTP 200)
+  probeProvider(p).then(function (blocked) {
+    if (blocked && my === tileToken && tileIdx < TILE_PROVIDERS.length - 1) {
+      map.removeLayer(tileLayer);
+      tileIdx++;
+      addTileLayer();
+    }
+  });
+}
+
+function cycleTileProvider() {
+  if (!map || !tileLayer) return;
+  tileToken++; // cancels any probe still pending for the old layer
+  map.removeLayer(tileLayer);
+  tileIdx = (tileIdx + 1) % TILE_PROVIDERS.length;
+  addTileLayer();
 }
 
 function buildMap() {
@@ -638,6 +719,8 @@ document.getElementById('reload').addEventListener('click', function () {
   document.getElementById('pickerr').textContent = '';
   document.getElementById('overlay').hidden = false;
 });
+
+document.getElementById('tiles').addEventListener('click', cycleTileProvider);
 
 var picker = document.getElementById('pick');
 picker.addEventListener('change', function () {
