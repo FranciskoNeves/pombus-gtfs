@@ -23,9 +23,6 @@
   #tripinfo { font-size: 13px; color: #333; line-height: 1.6; }
   .row { display: flex; align-items: center; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
   button { padding: 6px 12px; border: 0; border-radius: 6px; background: #0072BC; color: #fff; cursor: pointer; }
-  button.on { background: #d9534f; }
-  #speed { width: auto; margin: 0; }
-  #clock { font-variant-numeric: tabular-nums; font-weight: 600; }
   .chk, .toggles label { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #333; margin: 3px 0; cursor: pointer; }
   #horario { max-height: 40vh; overflow-y: auto; margin-top: 6px; }
   .hrow { display: flex; gap: 8px; padding: 4px 6px; border-radius: 6px; cursor: pointer; font-size: 13px; }
@@ -52,23 +49,11 @@
     <div id="routename"></div>
     <div id="feedmeta"></div>
     <button id="reload" class="linkbtn">recarregar ficheiros GTFS…</button>
-    <button id="tiles" class="linkbtn">mapa de fundo: …</button>
 
     <section class="box">
       <div class="lbl">Viagem</div>
       <select id="trip"></select>
       <div id="tripinfo"></div>
-      <div class="row">
-        <button id="play">Simular</button>
-        <select id="speed">
-          <option value="15">15×</option>
-          <option value="30">30×</option>
-          <option value="60" selected>60×</option>
-          <option value="120">120×</option>
-        </select>
-        <span id="clock">--:--:--</span>
-        <label class="chk"><input type="checkbox" id="follow"> seguir</label>
-      </div>
     </section>
 
     <section class="box toggles">
@@ -345,8 +330,7 @@ function loadViaPicker(fileList) {
 }
 
 var model, map, current = null;
-var layers = { shape: null, stops: null, allStops: null, allShapes: null, bus: null };
-var sim = null;
+var layers = { shape: null, stops: null, allStops: null, allShapes: null };
 
 function init(files) {
   model = buildModel(files);
@@ -373,119 +357,15 @@ function buildHeader() {
     (model.calDates.length ? esc(' · ' + model.calDates.length + ' exceções (feriados)') : '');
 }
 
-var TILE_PROVIDERS = [
-  { name: 'OpenStreetMap',
-    url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' },
-  { name: 'OSM Deutschland',
-    url: 'https://tile.openstreetmap.de/{z}/{x}/{y}.png',
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' },
-  { name: 'OpenTopoMap',
-    url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
-    attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, SRTM | Style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (CC-BY-SA)' },
-  { name: 'CARTO Voyager',
-    url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://carto.com/attributions">CARTO</a>' },
-  { name: 'Esri',
-    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
-    attribution: 'Tiles &copy; Esri' }
-];
-var tileLayer = null, tileIdx = 0, tileErrs = 0, tileToken = 0;
-
-// Since 2025 tile.openstreetmap.org answers usage-policy blocks with a valid
-// "Access blocked" PNG and HTTP 200 (x-blocked header), so Leaflet never fires
-// 'tileerror' and a fallback chain keyed on errors alone never triggers. Each
-// provider is therefore also probed: one tile is fetched/read via CORS, drawn
-// to a canvas and fingerprinted; a block image skips the provider.
-var PROBE_Z = 15, PROBE_LAT = 39.9159, PROBE_LON = -8.6283; // Pombal
-
-function probeUrl(p) {
-  var n = Math.pow(2, PROBE_Z);
-  var x = Math.floor((PROBE_LON + 180) / 360 * n);
-  var latRad = PROBE_LAT * Math.PI / 180;
-  var y = Math.floor((1 - Math.log(Math.tan(latRad) + 1 / Math.cos(latRad)) / Math.PI) / 2 * n);
-  return p.url.replace('{s}', 'a').replace('{z}', String(PROBE_Z))
-              .replace('{x}', String(x)).replace('{y}', String(y)).replace('{r}', '');
-}
-
-// fingerprint of the block tile: a page that is almost all pure white with
-// some dark text (real map tiles are never like that)
-function tileLooksBlocked(img) {
-  try {
-    var w = img.naturalWidth || 256, h = img.naturalHeight || 256;
-    var c = document.createElement('canvas');
-    c.width = w; c.height = h;
-    var ctx = c.getContext('2d');
-    if (!ctx || !ctx.drawImage || !ctx.getImageData) return false;
-    ctx.drawImage(img, 0, 0);
-    var d = ctx.getImageData(0, 0, w, h).data;
-    var white = 0, dark = 0, n = 0;
-    for (var i = 0; i < d.length; i += 16) { // every 4th pixel
-      n++;
-      if (d[i] >= 248 && d[i + 1] >= 248 && d[i + 2] >= 248) white++;
-      else if (d[i] <= 100 && d[i + 1] <= 100 && d[i + 2] <= 100) dark++;
-    }
-    return n > 0 && white / n >= 0.8 && dark / n >= 0.005;
-  } catch (e) { return false; } // tainted canvas or no 2d context: cannot tell
-}
-
-function imageProbe(p) {
-  return new Promise(function (resolve) {
-    var img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = function () { resolve(tileLooksBlocked(img)); };
-    img.onerror = function () { resolve(false); }; // real errors -> tileerror path
-    img.src = probeUrl(p);
-  });
-}
-
-function probeProvider(p) {
-  // 1) fetch: OSM marks policy blocks with an x-blocked response header
-  return fetch(probeUrl(p)).then(function (r) {
-    if (r && r.headers && r.headers.get && r.headers.get('x-blocked')) return true;
-    return imageProbe(p); // 2) canvas fingerprint of the tile image
-  }).catch(function () {
-    return imageProbe(p);
-  });
-}
-
-function updateTileBtn() {
-  var b = document.getElementById('tiles');
-  if (b) b.textContent = 'mapa de fundo: ' + ((TILE_PROVIDERS[tileIdx] || {}).name || '—');
-}
+// Fixed basemap: Esri World Street Map — free, no API key, no blocking of
+// light-use apps (unlike tile.openstreetmap.org and CARTO).
+var ESRI_TILES = {
+  url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
+  attribution: 'Tiles &copy; Esri'
+};
 
 function addTileLayer() {
-  var my = ++tileToken;
-  var p = TILE_PROVIDERS[tileIdx];
-  tileErrs = 0;
-  tileLayer = L.tileLayer(p.url, { maxZoom: 19, attribution: p.attribution });
-  tileLayer.on('tileerror', function () {
-    tileErrs++;
-    // provider refusing with real HTTP errors (403 / key): next free one
-    if (tileErrs >= 6 && tileIdx < TILE_PROVIDERS.length - 1) {
-      map.removeLayer(tileLayer);
-      tileIdx++;
-      addTileLayer();
-    }
-  });
-  tileLayer.addTo(map);
-  updateTileBtn();
-  // in parallel, probe for blocks served as valid images (HTTP 200)
-  probeProvider(p).then(function (blocked) {
-    if (blocked && my === tileToken && tileIdx < TILE_PROVIDERS.length - 1) {
-      map.removeLayer(tileLayer);
-      tileIdx++;
-      addTileLayer();
-    }
-  });
-}
-
-function cycleTileProvider() {
-  if (!map || !tileLayer) return;
-  tileToken++; // cancels any probe still pending for the old layer
-  map.removeLayer(tileLayer);
-  tileIdx = (tileIdx + 1) % TILE_PROVIDERS.length;
-  addTileLayer();
+  L.tileLayer(ESRI_TILES.url, { maxZoom: 19, attribution: ESRI_TILES.attribution }).addTo(map);
 }
 
 function buildMap() {
@@ -574,19 +454,7 @@ function buildToggles() {
   layers.stops.addTo(map);
 }
 
-function clearSim() {
-  if (sim) {
-    if (sim.raf) cancelAnimationFrame(sim.raf);
-    if (layers.bus) { map.removeLayer(layers.bus); layers.bus = null; }
-    sim = null;
-  }
-  document.getElementById('play').textContent = 'Simular';
-  document.getElementById('play').classList.remove('on');
-}
-
 function selectTrip(tripId) {
-  clearSim();
-  document.getElementById('clock').textContent = '--:--:--';
   current = tripId;
   var trip = model.tripsById[tripId];
   var sts = model.stByTrip[tripId] || [];
@@ -648,79 +516,10 @@ function selectTrip(tripId) {
   }
 }
 
-function startSim() {
-  var trip = model.tripsById[current];
-  var shape = model.shapes[trip.shape_id] || [];
-  if (!shape.length) return;
-  var mapping = mapTripToShape(model, current);
-  if (!mapping.mapped.length) return;
-  var track = buildTrack(mapping.mapped, mapping.shapeLen);
-  var t0 = track[0], t1 = track[track.length - 1];
-  var posFn = makePosFn(track, shape);
-  if (!layers.bus) {
-    layers.bus = L.marker([shape[0][0], shape[0][1]], { zIndexOffset: 1000 });
-  }
-  if (sim && sim.paused) {
-    // resume
-    sim.paused = false;
-    sim.wall0 = performance.now() - sim.elapsedWall;
-    loopSim();
-    return;
-  }
-  sim = { track: track, t0: t0, t1: t1, posFn: posFn, elapsed: 0, elapsedWall: 0, wall0: performance.now(), paused: false, raf: 0, rows: document.querySelectorAll('#horario .hrow') };
-  document.getElementById('clock').textContent = hhmmss(t0);
-  layers.bus.addTo(map);
-  loopSim();
-}
-
-function loopSim() {
-  if (!sim) return;
-  var speed = +document.getElementById('speed').value || 60;
-  var now = performance.now();
-  sim.elapsedWall = now - sim.wall0;
-  sim.elapsed = sim.elapsedWall / 1000 * speed;
-  var sec = sim.t0 + sim.elapsed;
-  if (sec >= sim.t1) {
-    var pEnd = sim.posFn(sim.t1);
-    layers.bus.setLatLng([pEnd.lat, pEnd.lon]);
-    document.getElementById('clock').textContent = hhmmss(sim.t1) + ' · fim';
-    clearSim();
-    return;
-  }
-  var p = sim.posFn(sec);
-  layers.bus.setLatLng([p.lat, p.lon]);
-  document.getElementById('clock').textContent = hhmmss(sec);
-  if (document.getElementById('follow').checked) map.setView([p.lat, p.lon], map.getZoom(), { animate: false });
-  // active timetable row: last stop with dep <= sec
-  var sts = model.stByTrip[current];
-  var active = -1;
-  for (var i = 0; i < sts.length; i++) if (sts[i].dep <= sec) active = i;
-  sim.rows.forEach(function (rowEl, idx) { rowEl.classList.toggle('active', idx === active); });
-  sim.raf = requestAnimationFrame(loopSim);
-}
-
-document.getElementById('play').addEventListener('click', function () {
-  if (sim && !sim.paused) {
-    if (sim.raf) cancelAnimationFrame(sim.raf);
-    sim.paused = true;
-    this.textContent = 'Continuar';
-    this.classList.add('on');
-    return;
-  }
-  this.textContent = 'Pausar';
-  this.classList.add('on');
-  startSim();
-});
-document.getElementById('speed').addEventListener('change', function () {
-  if (sim) { sim.wall0 = performance.now() - sim.elapsedWall; }
-});
-
 document.getElementById('reload').addEventListener('click', function () {
   document.getElementById('pickerr').textContent = '';
   document.getElementById('overlay').hidden = false;
 });
-
-document.getElementById('tiles').addEventListener('click', cycleTileProvider);
 
 var picker = document.getElementById('pick');
 picker.addEventListener('change', function () {
