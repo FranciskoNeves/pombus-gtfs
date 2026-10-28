@@ -98,15 +98,15 @@ const SERVICE = { service_id: "escolar", start_date: "20260101", end_date: "2026
 // Feriados 2026: nacionais + municipal de Pombal (11/11, São Martinho) — removidos via calendar_dates.txt
 const HOLIDAYS = ["20260101","20260403","20260405","20260425","20260501","20260604","20260610","20260815","20261005","20261101","20261111","20261201","20261208","20261225"];
 const ROUTE = { route_id: "L1", short_name: "1", long_name: "Linha 1 - Azul", color: "0072BC", text_color: "FFFFFF", route_type: 3 };
-const FEED_VERSION = "2026-10-25-shapes-l1bcasvolt";
+const FEED_VERSION = "2026-10-28-paragens8-coord";
 const FEED_CONTACT = { email: "geral@cm-pombal.pt", url: "https://www.cm-pombal.pt/servicos/pombus" };
 
 // Paragens por ordem de rota (coordenadas WGS84 fornecidas pelo utilizador)
 const STOPS = [
 ["Largo do Cardal",39.91587686942787,-8.628326152997865],
-["Mercado",39.916435322302185,-8.626376225203702],
-["Hospital",39.91696196440774,-8.624493314564981],
-["Rot. do Bombeiro",39.9174310016416,-8.621725274827353],
+["Mercado",39.91635,-8.62641],
+["Hospital",39.9169,-8.62448],
+["Rot. do Bombeiro",39.91734,-8.62174],
 ["Casarelo",39.91395411754951,-8.617774659456206],
 ["Escola M. de Pombal",39.919409068385654,-8.623128973540204],
 ["Governos 1 (R. dos Adoradores do Sol)",39.92181650368113,-8.624503129592233],
@@ -115,16 +115,16 @@ const STOPS = [
 ["Governos 4 (R. dos Governos 2)",39.923900367259094,-8.619927546015182],
 ["Governos 5 (Rotunda)",39.92459428169255,-8.618418853759332],
 ["Vinagres 1 (R. dos Vinagres)",39.92312384785638,-8.617350732928017],
-["Vinagres 2 (R. dos Vinagres)",39.922067903444564,-8.618624631079244],
-["Vinagres 3 (R. dos Vinagres)",39.92150730760502,-8.619010087453045],
-["Jardim Biscarrose",39.92007259599271,-8.620933575546816],
+["Vinagres 2 (R. dos Vinagres)",39.92189,-8.61867],
+["Vinagres 3 (R. dos Vinagres)",39.92137,-8.61971],
+["Jardim Biscarrose",39.92003,-8.62146],
 ["R. Aristides S. Mendes",39.91933216207925,-8.618630642994638],
 ["R. A. Gaspar Serrano",39.91978330059572,-8.61525627124968],
 ["Bairro dos Caseirinhos",39.91977429209136,-8.611746401530118],
-["Rot. do Agricultor",39.91972288096032,-8.613385681195535],
+["Rot. do Agricultor",39.91967,-8.61338],
 ["Avenida (Cercipom)",39.91868808381511,-8.617605907025482],
 ["Rot. do Bombeiro (volta)",39.91791358397185,-8.621079684584654],
-["Escola M. de Pombal (volta)",39.919409068385654,-8.623128973540204],
+["Escola M. de Pombal (volta)",39.91928,-8.62314],
 ["Casarelo (volta)",39.91395411754951,-8.617774659456206],
 ["Hospital (volta)",39.91699423595943,-8.624622835887408],
 ["Mercado (volta)",39.9167071757663,-8.626520334128205],
