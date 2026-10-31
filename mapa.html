@@ -2,13 +2,13 @@
 <html lang="pt">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Pombus — Mapa GTFS</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
   * { box-sizing: border-box; }
-  html, body { margin: 0; height: 100%; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
-  #app { display: flex; height: 100%; }
+  html, body { margin: 0; height: 100%; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
+  #app { display: flex; height: 100%; height: 100dvh; }
   #side { width: 360px; min-width: 300px; overflow-y: auto; background: #f7f8fa; border-right: 1px solid #ddd; padding: 14px; }
   #map { flex: 1; height: 100%; }
   h1 { margin: 0; font-size: 22px; letter-spacing: .5px; }
@@ -27,6 +27,7 @@
   #horario { max-height: 40vh; overflow-y: auto; margin-top: 6px; }
   .hrow { display: flex; gap: 8px; padding: 4px 6px; border-radius: 6px; cursor: pointer; font-size: 13px; }
   .hrow:hover { background: #eef4fa; }
+  .hrow:active { background: #e0edf8; }
   .hrow.active { background: #d7e7f7; }
   .ht { font-variant-numeric: tabular-nums; color: #0072BC; font-weight: 600; white-space: nowrap; }
   .hn { color: #333; overflow: hidden; text-overflow: ellipsis; }
@@ -38,7 +39,22 @@
   #overlay[hidden] { display: none; }
   #filebox { background: #fff; border-radius: 10px; padding: 24px 28px; max-width: 520px; line-height: 1.6; }
   #filebox pre { background: #f0f2f5; padding: 8px 12px; border-radius: 6px; overflow-x: auto; }
-  @media (max-width: 720px) { #app { flex-direction: column; } #side { width: 100%; max-height: 45%; } #map { min-height: 55%; } }
+  @media (max-width: 720px) {
+    #app { flex-direction: column; }
+    #side { width: 100%; max-height: 45%;
+            padding-top: max(14px, env(safe-area-inset-top));
+            padding-left: max(14px, env(safe-area-inset-left));
+            padding-right: max(14px, env(safe-area-inset-right)); }
+    #map { min-height: 55%; }
+  }
+  /* ecrãs de toque (telemóveis/tablets): alvos de toque maiores */
+  @media (pointer: coarse) {
+    select { padding: 10px; }
+    .hrow { padding: 11px 8px; }
+    .chk, .toggles label { margin: 8px 0; }
+    .donatebtn { padding: 12px 16px; }
+    button { padding: 10px 14px; }
+  }
 </style>
 </head>
 <body>
@@ -420,7 +436,7 @@ var BASE_TILES = {
 };
 
 function addTileLayer() {
-  L.tileLayer(BASE_TILES.url, { maxZoom: 18, attribution: BASE_TILES.attribution }).addTo(map);
+  L.tileLayer(BASE_TILES.url, { maxZoom: 18, detectRetina: true, attribution: BASE_TILES.attribution }).addTo(map);
 }
 
 function buildMap() {
@@ -547,15 +563,19 @@ function selectTrip(tripId) {
   // timetable
   var hor = document.getElementById('horario');
   hor.innerHTML = '';
+  var rows = [];
   sts.forEach(function (st, i) {
     var sm = model.stopMap[st.stopId];
     var row = document.createElement('div');
     row.className = 'hrow';
     row.dataset.i = i;
+    rows.push(row);
     var t = hhmm(st.dep) + (st.arr !== st.dep ? '–' + hhmm(st.arr) : '');
     row.innerHTML = '<span class="ht">' + t + '</span><span class="hn">' +
       esc(sm.id + ' · ' + sm.name) + '</span>';
     row.addEventListener('click', function () {
+      rows.forEach(function (r) { r.classList.remove('active'); });
+      row.classList.add('active');
       map.panTo([sm.lat, sm.lon]);
       if (shape.length && m[i]) map.setView([shape[m[i].idx][0], shape[m[i].idx][1]], Math.max(map.getZoom(), 16));
       markerFor(st.stopId, { radius: 8 })
