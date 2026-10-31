@@ -35,10 +35,15 @@
   .leaflet-popup-content { font-size: 13px; line-height: 1.5; }
   .pop-times { margin-top: 4px; }
   .pop-times span { display: inline-block; margin: 1px 3px 1px 0; padding: 0 6px; border-radius: 4px; background: #eef4fa; color: #0072BC; font-weight: 600; }
-  #overlay { position: fixed; inset: 0; background: rgba(0,0,0,.5); display: flex; align-items: center; justify-content: center; z-index: 2000; }
-  #overlay[hidden] { display: none; }
-  #filebox { background: #fff; border-radius: 10px; padding: 24px 28px; max-width: 520px; line-height: 1.6; }
+  #overlay, #about { position: fixed; inset: 0; background: rgba(0,0,0,.5); display: flex; align-items: center; justify-content: center; z-index: 2000; }
+  #overlay[hidden], #about[hidden] { display: none; }
+  #filebox, #aboutbox { background: #fff; border-radius: 10px; padding: 24px 28px; max-width: 520px; line-height: 1.6; margin: 16px; }
   #filebox pre { background: #f0f2f5; padding: 8px 12px; border-radius: 6px; overflow-x: auto; }
+  #aboutbox { max-height: 80vh; overflow-y: auto; }
+  #aboutbox h2 { margin-top: 0; }
+  #aboutbox a { color: #0072BC; }
+  .aboutlink { text-align: center; margin: 14px 0 4px; }
+  .linkbtn { background: none; border: 0; padding: 0; color: #0072BC; cursor: pointer; font: inherit; text-decoration: underline; }
   @media (max-width: 720px) {
     #app { flex-direction: column; }
     #side { width: 100%; max-height: 45%;
@@ -89,6 +94,8 @@
     <p id="donateWrap" hidden>
       <a id="donate" href="#" target="_blank" rel="noopener" class="donatebtn"></a>
     </p>
+
+    <p class="aboutlink"><button id="aboutBtn" class="linkbtn">Sobre este projeto</button></p>
   </aside>
   <main id="map"></main>
 </div>
@@ -101,6 +108,18 @@
     <p>Alternativa sem servidor: seleciona manualmente os 9 ficheiros <code>.txt</code> da pasta <code>gtfs/</code>:</p>
     <input type="file" id="pick" multiple accept=".txt">
     <div id="pickerr" style="color:#c0392b"></div>
+  </div>
+</div>
+
+<div id="about" hidden>
+  <div id="aboutbox">
+    <h2>Sobre este projeto</h2>
+    <p>O Mapa Pombus é um site independente que mostra os percursos e horários da rede municipal de autocarros Pombus (Pombal) num mapa interativo. Os horários são os oficiais, publicados pela Câmara Municipal de Pombal; os percursos foram georreferenciados manualmente e os dados seguem o padrão aberto GTFS — o mesmo formato usado pelo Google Maps.</p>
+    <p>Neste momento o site mostra apenas a Linha 1 – Azul. As restantes linhas da rede serão adicionadas gradualmente.</p>
+    <p>Este projeto não tem ligação oficial com a Câmara Municipal de Pombal nem com a marca Pombus.</p>
+    <p>Encontraste um erro, falta alguma paragem ou tens uma sugestão? Envia uma mensagem para<br>
+    <a href="mailto:kiko_afn@hotmail.com?subject=Sugest%C3%B5es%20%E2%80%94%20Mapa%20Pombus">kiko_afn@hotmail.com</a></p>
+    <p style="text-align:right; margin-bottom:0;"><button id="aboutClose">Fechar</button></p>
   </div>
 </div>
 
@@ -632,6 +651,17 @@ picker.addEventListener('change', function () {
   }).catch(function (e) {
     document.getElementById('pickerr').textContent = 'Erro: ' + e.message;
   });
+});
+
+// Janela «Sobre este projeto» (apresentação + contacto para sugestões)
+document.getElementById('aboutBtn').addEventListener('click', function () {
+  document.getElementById('about').hidden = false;
+});
+document.getElementById('aboutClose').addEventListener('click', function () {
+  document.getElementById('about').hidden = true;
+});
+document.getElementById('about').addEventListener('click', function (e) {
+  if (e.target === this) this.hidden = true; // clicar fora da caixa também fecha
 });
 
 loadViaFetch().then(function (files) {
