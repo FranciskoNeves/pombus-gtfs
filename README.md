@@ -23,6 +23,12 @@ Site estático (index.html) com o mapa da Linha 1 do Pombus (Pombal, Portugal), 
 - Alternativa sem servidor: abrir mapa.html e, no diálogo que aparece, selecionar manualmente os 9 ficheiros .txt da pasta gtfs/.
 - Nota: nas viagens com traçado L1-A, o site avisa que Governos 2 (~104 m) e o R. do Lagar (~261 m, vaivém do traçado) ficam longe do traçado desenhado — são avisos de ordem do percurso, não erros do visualizador: a ordem oficial das paragens é Governos 1 → 2, mas o traçado passa primeiro na rua de Governos 2, e o R. do Lagar é servido no vaivém da R. das Maiorcas. As distâncias de projeção mais próximas são agora ~12 m (Governos 2) e ~7 m (R. do Lagar); o validador GTFS já não acusa nenhuma paragem como longe do traçado L1-A.
 
+## Monetização (donativos + AdSense)
+Ambas as opções estão implementadas no mapa.html e desativadas por predefinição — nada carrega e nada aparece enquanto os valores não estiverem preenchidos no topo do script (secção «MONETIZAÇÃO»).
+- Donativos: cria uma conta num serviço de apoio (Buy Me a Coffee, Ko-fi ou PayPal.me) e cola o teu link em DONATE_URL. O botão «Apoiar este projeto» passa a aparecer no fundo da barra lateral; o texto edita-se em DONATE_LABEL.
+- Google AdSense: requer o site publicado num domínio público (não funciona em file:// nem em localhost) e uma conta AdSense aprovada. Depois da aprovação, cria um bloco de anúncios Display no painel e cola o ID do publisher (ca-pub-…) em ADSENSE_CLIENT e o ID do bloco em ADSENSE_SLOT. O bloco de anúncios passa a aparecer no fundo da barra lateral.
+- Nota: «Pombus» é um serviço/marca da Câmara Municipal de Pombal. Antes de ativar publicidade, o ideal é acordar o projeto com a Câmara (patrocínio/parceria em vez de anúncios genéricos).
+
 ## Próximos passos
 - Terminar o site e publicá-lo (GitHub Pages ou outro alojamento estático).
 - Só depois da publicação, adicionar as restantes linhas do Pombus aos poucos (começando pela Linha 2 – Vermelha).
