@@ -20,6 +20,7 @@
   .lbl { font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: .4px; }
   select, button { font: inherit; }
   select { width: 100%; margin: 4px 0 8px; padding: 6px; border: 1px solid #ccc; border-radius: 6px; background: #fff; }
+  select option:disabled { color: #999; }
   #tripinfo { font-size: 13px; color: #333; line-height: 1.6; }
   .row { display: flex; align-items: center; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
   button { padding: 6px 12px; border: 0; border-radius: 6px; background: #0072BC; color: #fff; cursor: pointer; }
@@ -45,10 +46,15 @@
 <body>
 <div id="app">
   <aside id="side">
-    <h1><span class="dot"></span>Pombus</h1>
+    <h1><span class="dot" id="dot"></span>Pombus</h1>
     <div id="routename"></div>
     <div id="feedmeta"></div>
     <button id="reload" class="linkbtn">recarregar ficheiros GTFS…</button>
+
+    <section class="box">
+      <div class="lbl">Linha</div>
+      <select id="line"></select>
+    </section>
 
     <section class="box">
       <div class="lbl">Viagem</div>
@@ -295,6 +301,22 @@ function serviceLabel(cal) {
 var GTFS_NAMES = ['agency.txt', 'calendar.txt', 'calendar_dates.txt', 'feed_info.txt',
                   'routes.txt', 'shapes.txt', 'stop_times.txt', 'stops.txt', 'trips.txt'];
 
+// Catálogo das linhas da rede Pombus (9 linhas). As que ainda não existem no
+// feed aparecem no seletor como «(Brevemente)» e ficam selecionáveis
+// automaticamente quando a rota for adicionada a gtfs/routes.txt com o
+// route_id aqui indicado (L2, L3, L3.1, L4, L4.1, L5, L6, L7).
+var LINES = [
+  { routeId: 'L1',   label: 'Linha 1 – Azul' },
+  { routeId: 'L2',   label: 'Linha 2 – Vermelha' },
+  { routeId: 'L3',   label: 'Linha 3 – Verde' },
+  { routeId: 'L3.1', label: 'Linha 3.1 – Verde (Via Aldeia dos Redondos)' },
+  { routeId: 'L4',   label: 'Linha 4 – Amarela' },
+  { routeId: 'L4.1', label: 'Linha 4.1 – Amarela (Via Valdeira)' },
+  { routeId: 'L5',   label: 'Linha 5 – Laranja' },
+  { routeId: 'L6',   label: 'Linha 6 – Lilás' },
+  { routeId: 'L7',   label: 'Linha 7 – Cinza' }
+];
+
 function esc(s) {
   return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
@@ -329,21 +351,56 @@ function loadViaPicker(fileList) {
   });
 }
 
-var model, map, current = null;
+var model, map, current = null, currentRoute = null;
 var layers = { shape: null, stops: null, allStops: null, allShapes: null };
 
 function init(files) {
   model = buildModel(files);
-  buildHeader();
   buildMap();
-  buildTripSelect();
+  buildLineSelect();
   buildToggles();
+  document.getElementById('line').addEventListener('change', function () { selectLine(this.value); });
   document.getElementById('trip').addEventListener('change', function () { selectTrip(this.value); });
+  selectLine(document.getElementById('line').value);
+}
+
+function buildLineSelect() {
+  var sel = document.getElementById('line');
+  sel.innerHTML = '';
+  var seen = {}, firstEnabled = null;
+  LINES.forEach(function (ln) {
+    var o = document.createElement('option');
+    var has = !!model.routeById[ln.routeId];
+    o.value = ln.routeId;
+    o.textContent = ln.label + (has ? '' : ' (Brevemente)');
+    o.disabled = !has;
+    seen[ln.routeId] = true;
+    if (has && firstEnabled === null) firstEnabled = ln.routeId;
+    sel.appendChild(o);
+  });
+  // rotas presentes no feed mas fora do catálogo também ficam selecionáveis
+  model.routes.forEach(function (r) {
+    if (seen[r.route_id]) return;
+    var o = document.createElement('option');
+    o.value = r.route_id;
+    o.textContent = r.route_long_name || r.route_id;
+    if (firstEnabled === null) firstEnabled = r.route_id;
+    sel.appendChild(o);
+  });
+  if (firstEnabled !== null) sel.value = firstEnabled;
+}
+
+function selectLine(routeId) {
+  currentRoute = routeId;
+  buildHeader();
+  document.getElementById('dot').style.background = routeColor();
+  buildTripSelect();
+  rebuildRouteLayers();
   selectTrip(document.getElementById('trip').value);
 }
 
 function buildHeader() {
-  var route = model.routes[0] || {};
+  var route = model.routeById[currentRoute] || model.routes[0] || {};
   document.getElementById('routename').textContent =
     (route.route_long_name || '') + (route.route_short_name ? '  ·  nº ' + route.route_short_name : '');
   var fi = model.feedInfo[0] || {};
@@ -378,7 +435,7 @@ function buildMap() {
 }
 
 function routeColor() {
-  var r = model.routes[0] || {};
+  var r = model.routeById[currentRoute] || model.routes[0] || {};
   return r.route_color ? '#' + r.route_color : '#0072BC';
 }
 
@@ -387,8 +444,9 @@ function stopPopupHtml(stopId, highlightTripId) {
   var entries = model.byStop[stopId] || [];
   var times = entries.map(function (e) {
     var tr = model.tripsById[e.tripId] || {};
-    var cls = e.tripId === highlightTripId ? ' style="background:#0072BC;color:#fff"' : '';
-    var pat = tr.pattern ? ' <small>' + tr.pattern + '</small>' : '';
+    var cls = e.tripId === highlightTripId ? ' style="background:' + routeColor() + ';color:#fff"' : '';
+    var rt = (model.routeById[tr.route_id] && model.routeById[tr.route_id].route_short_name) || tr.route_id || '';
+    var pat = ' <small>' + esc(rt) + (tr.pattern ? '·' + tr.pattern : '') + '</small>';
     return '<span' + cls + ' title="' + esc(tr.trip_headsign || '') + '">' + hhmm(e.dep) + pat + '</span>';
   }).join('');
   return '<strong>' + esc(s.name) + '</strong><br><span class="legend">' + esc(s.id) + ' · ' +
@@ -407,7 +465,7 @@ function markerFor(stopId, opts) {
 function buildTripSelect() {
   var sel = document.getElementById('trip');
   sel.innerHTML = '';
-  var ordered = model.trips.slice().sort(function (a, b) {
+  var ordered = model.trips.filter(function (t) { return t.route_id === currentRoute; }).slice().sort(function (a, b) {
     var ta = model.stByTrip[a.trip_id], tb = model.stByTrip[b.trip_id];
     var da = ta && ta.length ? ta[0].dep : 0, db = tb && tb.length ? tb[0].dep : 0;
     return da - db;
@@ -422,6 +480,7 @@ function buildTripSelect() {
     o.textContent = label + '  [' + t.pattern + ']';
     sel.appendChild(o);
   });
+  if (ordered.length && !sel.value) sel.value = ordered[0].trip_id;
 }
 
 function buildToggles() {
@@ -434,24 +493,35 @@ function buildToggles() {
   bind('tStops', layers.stops);
   bind('tAllStops', layers.allStops);
   bind('tAllShapes', layers.allShapes);
+  layers.shape.addTo(map);
+  layers.stops.addTo(map);
+}
 
-  // all shapes (faint)
+// Reconstrói as camadas «todos os traçados» e «todas as paragens» para a linha
+// selecionada (chamado ao mudar de linha; as paragens continuam a ser as de
+// todo o feed, para ver a rede à medida que forem sendo adicionadas linhas).
+function rebuildRouteLayers() {
+  layers.allShapes.clearLayers();
+  layers.allStops.clearLayers();
+  // traçados usados pelas viagens da linha selecionada (faint)
   var c = routeColor();
-  Object.keys(model.shapes).forEach(function (sid) {
+  var shapeIds = {};
+  model.trips.forEach(function (t) {
+    if (t.route_id === currentRoute && t.shape_id) shapeIds[t.shape_id] = true;
+  });
+  Object.keys(shapeIds).forEach(function (sid) {
     if (model.tripsById[current] && sid === model.tripsById[current].shape_id) return;
     L.polyline(model.shapes[sid], { color: c, weight: 3, opacity: 0.18, dashArray: '6 8' })
       .bindTooltip(esc(sid), { sticky: true })
       .addTo(layers.allShapes);
   });
-  // all stops (small grey)
+  // todas as paragens do feed (small grey)
   Object.keys(model.stopMap).forEach(function (sid) {
     markerFor(sid, { radius: 3.5, color: '#888', weight: 1, fillColor: '#ccc' })
       .bindPopup(function () { return stopPopupHtml(sid, current); })
       .bindTooltip(esc(model.stopMap[sid].name), { direction: 'top' })
       .addTo(layers.allStops);
   });
-  layers.shape.addTo(map);
-  layers.stops.addTo(map);
 }
 
 function selectTrip(tripId) {

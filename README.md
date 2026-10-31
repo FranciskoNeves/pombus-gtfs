@@ -16,6 +16,7 @@ Site estático (index.html) com o mapa da Linha 1 do Pombus (Pombal, Portugal), 
 
 ## Visualizar no mapa (mapa.html)
 - Mostra o feed GTFS lido diretamente da pasta gtfs/: traçado da viagem selecionada, paragens com horários de passagem (popup com todas as viagens que servem cada paragem), camada com todos os traçados e todas as paragens, horário da viagem.
+- Seletor de linhas: lista as 9 linhas da rede Pombus; as que ainda não têm dados no feed (L2, L3, L3.1, L4, L4.1, L5, L6, L7) aparecem como «(Brevemente)» e desativadas. Tornam-se selecionáveis automaticamente quando a respetiva rota for adicionada a gtfs/routes.txt (route_id: L2, L3, L3.1, L4, L4.1, L5, L6, L7). Ao mudar de linha, o seletor de viagens, o traçado, as paragens, os horários e a cor da linha passam a mostrar apenas essa linha; os popups das paragens identificam a linha e o padrão de cada passagem (ex.: 1·A).
 - Requer um servidor local (o browser bloqueia a leitura de ficheiros em file://):
   1. Na raiz do repositório: `python3 -m http.server 8000`
   2. Abrir http://localhost:8000/mapa.html (requer internet para os tiles do mapa). Tiles: OSM Deutschland (tile.openstreetmap.de — dados OpenStreetMap servidos pelo servidor comunitário alemão, gratuito, sem chave; ao contrário do tile.openstreetmap.org, que bloqueia com imagens «Access blocked», e da CARTO, que passou a exigir API key). Leaflet em si é livre e não requer chave nenhuma; só o fundo de mapa vem de um servidor de tiles terceiro.
@@ -23,4 +24,6 @@ Site estático (index.html) com o mapa da Linha 1 do Pombus (Pombal, Portugal), 
 - Nota: nas viagens com traçado L1-A, o site avisa que Governos 2 (~104 m) e o R. do Lagar (~261 m, vaivém do traçado) ficam longe do traçado desenhado — são avisos de ordem do percurso, não erros do visualizador: a ordem oficial das paragens é Governos 1 → 2, mas o traçado passa primeiro na rua de Governos 2, e o R. do Lagar é servido no vaivém da R. das Maiorcas. As distâncias de projeção mais próximas são agora ~12 m (Governos 2) e ~7 m (R. do Lagar); o validador GTFS já não acusa nenhuma paragem como longe do traçado L1-A.
 
 ## Próximos passos
-- Com as 6 shapes da Linha 1 redesenhadas: validar o feed (gtfs-validator) e submeter ao Google Maps; depois, as restantes 8 linhas do Pombus.
+- Terminar o site e publicá-lo (GitHub Pages ou outro alojamento estático).
+- Só depois da publicação, adicionar as restantes linhas do Pombus aos poucos (começando pela Linha 2 – Vermelha).
+- Validar o feed (gtfs-validator) e submeter ao Google Maps.
