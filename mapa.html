@@ -13,9 +13,6 @@
   #map { flex: 1; height: 100%; }
   h1 { margin: 0; font-size: 22px; letter-spacing: .5px; }
   h1 .dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: #0072BC; margin-right: 6px; }
-  #routename { color: #333; font-size: 14px; margin-top: 2px; }
-  #feedmeta { color: #666; font-size: 12px; margin-top: 8px; line-height: 1.5; }
-  .linkbtn { background: none; border: 0; color: #0072BC; padding: 2px 0; text-decoration: underline; cursor: pointer; font-size: 12px; margin-top: 6px; }
   .box { background: #fff; border: 1px solid #e2e4e8; border-radius: 8px; padding: 10px 12px; margin-top: 12px; }
   .lbl { font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: .4px; }
   select, button { font: inherit; }
@@ -47,9 +44,6 @@
 <div id="app">
   <aside id="side">
     <h1><span class="dot" id="dot"></span>Pombus</h1>
-    <div id="routename"></div>
-    <div id="feedmeta"></div>
-    <button id="reload" class="linkbtn">recarregar ficheiros GTFS…</button>
 
     <section class="box">
       <div class="lbl">Linha</div>
@@ -392,26 +386,10 @@ function buildLineSelect() {
 
 function selectLine(routeId) {
   currentRoute = routeId;
-  buildHeader();
   document.getElementById('dot').style.background = routeColor();
   buildTripSelect();
   rebuildRouteLayers();
   selectTrip(document.getElementById('trip').value);
-}
-
-function buildHeader() {
-  var route = model.routeById[currentRoute] || model.routes[0] || {};
-  document.getElementById('routename').textContent =
-    (route.route_long_name || '') + (route.route_short_name ? '  ·  nº ' + route.route_short_name : '');
-  var fi = model.feedInfo[0] || {};
-  var cal = model.calendar[0] || {};
-  document.getElementById('feedmeta').innerHTML =
-    esc('Feed ' + (fi.feed_version || '?')) + '<br>' +
-    esc(model.stats.trips + ' viagens · ' + model.stats.stops + ' paragens · ' +
-        model.stats.shapes + ' traçados · ' + model.stats.stopTimes + ' horários') + '<br>' +
-    esc('Serviço "' + (cal.service_id || '') + '": ' + serviceLabel(cal) + ', ' +
-        fmtDateGTFS(cal.start_date) + ' a ' + fmtDateGTFS(cal.end_date)) +
-    (model.calDates.length ? esc(' · ' + model.calDates.length + ' exceções (feriados)') : '');
 }
 
 // Fixed basemap: OSM Deutschland (tile.openstreetmap.de) — OpenStreetMap data
@@ -585,11 +563,6 @@ function selectTrip(tripId) {
     map.fitBounds(bounds.pad(0.05));
   }
 }
-
-document.getElementById('reload').addEventListener('click', function () {
-  document.getElementById('pickerr').textContent = '';
-  document.getElementById('overlay').hidden = false;
-});
 
 var picker = document.getElementById('pick');
 picker.addEventListener('change', function () {
