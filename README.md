@@ -19,6 +19,7 @@ Site estático (index.html) com o mapa da Linha 1 do Pombus (Pombal, Portugal), 
 - Seletor de linhas: lista as 9 linhas da rede Pombus; as que ainda não têm dados no feed (L2, L3, L3.1, L4, L4.1, L5, L6, L7) aparecem como «(Brevemente)» e desativadas. Tornam-se selecionáveis automaticamente quando a respetiva rota for adicionada a gtfs/routes.txt (route_id: L2, L3, L3.1, L4, L4.1, L5, L6, L7). Ao mudar de linha, o seletor de viagens, o traçado, as paragens, os horários e a cor da linha passam a mostrar apenas essa linha; os popups das paragens identificam a linha e o padrão de cada passagem (ex.: 1·A).
 - Otimizado para telemóvel: alvos de toque maiores em ecrãs de toque (linhas do horário, seletores, opções de camadas), a linha do horário tocada fica destacada, área de notch respeitada em iPhone (safe-area) e tiles nítidos em ecrãs retina (detectRetina).
 - Janela «Sobre este projeto»: apresentação do projeto, nota de que não tem ligação oficial com a Câmara Municipal de Pombal, e email de contacto para sugestões (kiko_afn@hotmail.com) com assunto pré-preenchido.
+- SEO (2026-11-07): title/description/canonical/OG + JSON-LD no mapa.html, parágrafo de introdução indexável; linha-1-azul.html = página estática com o horário completo da Linha 1 (gerada dos gtfs/*.txt; quadro 54 paragens × 10 viagens) ligada ao mapa; robots.txt e sitemap.xml apontam a https://pombus.pt/.
 - Requer um servidor local (o browser bloqueia a leitura de ficheiros em file://):
   1. Na raiz do repositório: `python3 -m http.server 8000`
   2. Abrir http://localhost:8000/mapa.html (requer internet para os tiles do mapa). Tiles: OSM Deutschland (tile.openstreetmap.de — dados OpenStreetMap servidos pelo servidor comunitário alemão, gratuito, sem chave; ao contrário do tile.openstreetmap.org, que bloqueia com imagens «Access blocked», e da CARTO, que passou a exigir API key). Leaflet em si é livre e não requer chave nenhuma; só o fundo de mapa vem de um servidor de tiles terceiro.
@@ -32,6 +33,7 @@ Ambas as opções estão implementadas no mapa.html e desativadas por predefini�
 - Nota: «Pombus» é um serviço/marca da Câmara Municipal de Pombal. Antes de ativar publicidade, o ideal é acordar o projeto com a Câmara (patrocínio/parceria em vez de anúncios genéricos).
 
 ## Próximos passos
-- Terminar o site e publicá-lo (GitHub Pages ou outro alojamento estático).
-- Só depois da publicação, adicionar as restantes linhas do Pombus aos poucos (começando pela Linha 2 – Vermelha).
+- Site publicado em https://pombus.pt/ (alojamento estático da dominios.pt; index.html no servidor = mapa.html do repo).
+- Submeter o sitemap (https://pombus.pt/sitemap.xml) no Google Search Console e pedir indexação de / e /linha-1-azul.html.
+- Adicionar as restantes linhas do Pombus aos poucos (começando pela Linha 2 – Vermelha); cada linha nova ganha também a sua página de horários estáticos (linha-X.html) e entrada no sitemap.
 - Validar o feed (gtfs-validator) e submeter ao Google Maps.
