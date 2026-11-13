@@ -9,3 +9,18 @@ L1,escolar,L1-1542,"Circular via Lar Rainha Sta. Isabel",0,L1-A-desvio
 L1,escolar,L1-1645,"Circular via Lar Rainha Sta. Isabel",0,L1-A-casvolt
 L1,escolar,L1-1742,"Circular via Centro Recreativo",0,L1-B
 L1,escolar,L1-1840,"Circular via Centro Recreativo",0,L1-B-casvolt
+L2,escolar,L2-0700,"Largo do Cardal",0,L2-V1
+L2,escolar,L2-0712,"Largo do Cardal",0,L2-V2
+L2,escolar,L2-0720,"Largo do Cardal",0,L2-V3
+L2,escolar,L2-0813,"Largo do Cardal",0,L2-V4
+L2,escolar,L2-0835,"Largo do Cardal",0,L2-V5
+L2,escolar,L2-0843,"Largo do Cardal",0,L2-V6
+L2,escolar,L2-1110,"Largo do Cardal",0,L2-V7
+L2,escolar,L2-1140,"Largo do Cardal",0,L2-V8
+L2,escolar,L2-1216,"Largo do Cardal",0,L2-V9
+L2,escolar,L2-1335,"Largo do Cardal",0,L2-V10
+L2,escolar,L2-1615,"Largo do Cardal",0,L2-V11
+L2,escolar,L2-1710,"Largo do Cardal",0,L2-V12
+L2,escolar,L2-1810,"Largo do Cardal",0,L2-V13
+L2,escolar,L2-1850,"Fonte Nova",0,L2-V14
+L2,escolar,L2-1910,"Barrocal (Covão da Silva)",0,L2-V15

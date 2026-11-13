@@ -53,3 +53,44 @@ P51,"R. da Fonte Nova (Filarmónica) (volta)",39.913387067478816,-8.638534156999
 P52,"Estrada da Charneca (volta)",39.913678069911974,-8.635661733752327
 P53,"Rot. da Cooperativa (volta)",39.91426385726057,-8.63119190702548
 P54,"Largo do Cardal (fim)",39.915863532349626,-8.628185333393409
+P55,"Posto da GNR",39.91643,-8.618536
+P56,"Barco",39.91611,-8.616974
+P57,"S. Cristovão (R. Primo Basílio 2)",39.911869,-8.611893
+P58,"S. Cristovão (R. Primo Basílio 1)",39.915439,-8.611073
+P59,"R. da Lameira",39.917362,-8.611685
+P60,"Largo da Feira",39.921846,-8.606192
+P61,"Escola do Barrocal",39.926076,-8.601781
+P62,"R. dos Santos",39.92824,-8.599578
+P63,"Barrocal (R. da Canada)",39.930897,-8.596354
+P64,"Barrocal (Covão da Silva)",39.934421,-8.593738
+P65,"R. dos Santos (volta)",39.92826,-8.599657
+P66,"Escola do Barrocal (volta)",39.92619,-8.601849
+P67,"R. Eiras de Belém",39.923965,-8.599975
+P68,"Capela Sra. de Belém",39.922154,-8.601196
+P69,"R. do Canto 1",39.919799,-8.602995
+P70,"R. do Canto 2",39.921012,-8.60577
+P71,"Largo da Feira (volta)",39.921904,-8.606789
+P72,"R. da Lameira (volta)",39.917545,-8.611762
+P73,"Barco (volta)",39.91619,-8.616942
+P74,"Posto da GNR (volta)",39.916561,-8.618463
+P75,"Rot. da Formiga",39.91393,-8.635168
+P76,"Fonte Nova",39.92045,-8.639981
+P77,"Z.I. Formiga (R. Manuel da Mota 1)",39.917338,-8.634184
+P78,"Z.I. Formiga (R. Manuel da Mota 2)",39.920593,-8.633595
+P79,"Z.I. Formiga (B. Margens do Arunca)",39.922676,-8.633431
+P80,"Z.I. Formiga (R. Prof. Veiga Simão)",39.924461,-8.636657
+P81,"Santorum (R. dos Olivais)",39.927242,-8.639789
+P82,"Santorum (Capela)",39.926261,-8.642227
+P83,"Souto 1",39.92395,-8.641679
+P84,"Souto 2",39.92142,-8.640372
+P85,"R. Narciso",39.918971,-8.642581
+P86,"R. do Centro 1",39.917955,-8.647148
+P87,"R. do Centro 2",39.919395,-8.649918
+P88,"R. S. Francisco 1",39.919513,-8.652802
+P89,"R. S. Francisco 2",39.917843,-8.656718
+P90,"Casal Fernão João (Capela)",39.916602,-8.655836
+P91,"Casal Fernão João (R. Sr. das Almas)",39.915986,-8.652081
+P92,"R. do Centro 1 (volta)",39.917707,-8.647384
+P93,"R. Narciso (volta)",39.918908,-8.642557
+P94,"Estrada do Degolaço",39.916669,-8.639811
+P95,"Escadaria Gualdim Pais",39.91063,-8.640454
