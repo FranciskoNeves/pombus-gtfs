@@ -24,3 +24,20 @@ L2,escolar,L2-1710,"Largo do Cardal",0,L2-V12
 L2,escolar,L2-1810,"Largo do Cardal",0,L2-V13
 L2,escolar,L2-1850,"Fonte Nova",0,L2-V14
 L2,escolar,L2-1910,"Barrocal (Covão da Silva)",0,L2-V15
+L3,escolar,L3-0700,"Largo do Cardal",0,L3-V1
+L3,escolar,L3-0725,"Escola M. de Pombal",0,L3-V2
+L3,escolar,L3-0802,"Largo do Cardal",0,L3-V3
+L3,escolar,L3-0810,"Largo do Cardal",0,L3-V4
+L3,escolar,L3-0825,"Largo do Cardal",0,L3-V5
+L3,escolar,L3-0915,"Largo do Cardal",0,L3-V6
+L3,escolar,L3-1130,"Escola M. de Pombal",0,L3-V7
+L3,escolar,L3-1217,"Escola M. de Pombal",0,L3-V8
+L3,escolar,L3-1245,"Escola M. de Pombal",0,L3-V9
+L3,escolar,L3-1304,"Largo do Cardal",0,L3-V10
+L3,escolar,L3-1355,"Largo do Cardal",0,L3-V11
+L3,escolar,L3-1600,"Escola M. de Pombal",0,L3-V12
+L3,escolar,L3-1610,"Escola M. de Pombal",0,L3-V13
+L3,escolar,L3-1720,"Largo do Cardal",0,L3-V14
+L3,escolar,L3-1810,"Largo do Cardal",0,L3-V15
+L3,escolar,L3-1900,"PIMM (ETAP)",0,L3-V16
+L3,escolar,L3-1920,"PIMM (ETAP)",0,L3-V17

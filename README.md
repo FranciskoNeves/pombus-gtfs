@@ -1,8 +1,8 @@
-# Pombus — site + feed GTFS (Linhas 1 Azul e 2 Vermelha)
+# Pombus — site + feed GTFS (Linhas 1 Azul, 2 Vermelha e 3 Verde)
 
 Site estático (index.html) com o mapa da Linha 1 do Pombus (Pombal, Portugal), horários e exportação do feed GTFS. Feed também disponível em gtfs/ (empacotar os 9 .txt num zip para validar/submeter).
 
-## Estado (13/11/2026)
+## Estado (14/11/2026)
 - 54 paragens com coordenadas reais fornecidas pelo utilizador.
 - 10 viagens oficiais (07:10–18:40), tempos ao minuto (HH:MM:00); paragens intermédias interpoladas por distância.
 - Dois percursos na Charneca: A (via Lar Rainha Sta. Isabel) e B (via Centro Recreativo); Casarelo (ida) só nas viagens 08:10 e 15:42; Escola M. de Pombal (volta) só nas primeiras 6 viagens (07:32, 08:40, 09:22, 11:22, 12:22, 13:52); Casarelo (volta) só nas viagens 08:10, 16:45 e 18:40 (08:45, 17:07, 19:03); Estrada da Charneca (volta) em todas as viagens (2 min antes da Rot. da Cooperativa volta).
@@ -17,13 +17,20 @@ Site estático (index.html) com o mapa da Linha 1 do Pombus (Pombal, Portugal), 
 - linha-2-vermelha.html: página estática com o horário completo (59 paragens × 15 viagens), gerada das tabelas de horários; sitemap.xml atualizado.
 - routes.txt: L2,POMBUS,2,"Linha 2 - Vermelha",3,E30613,FFFFFF (cor E30613 provisória; substituir quando houver cor oficial).
 
+### Linha 3 – Verde (14/11/2026)
+- 17 viagens oficiais (07:00–19:20), 43 paragens: 28 novas (P96–P123, cadeia do Escoural, Granja/Alto da Granja, PIMM e Expocentro, coords do KML My Maps) + 15 partilhadas com a L1/L2 (P01–P04, P06, P27, P31, P32, P52, P75, P76, P83, P84, P94, P95). A viagem das 07:00 parte do PIMM (Parque de Máquinas Municipais) e as das 19:00 e 19:20 terminam no PIMM (ETAP); as das 08:10, 13:04, 13:55, 16:10, 17:20 e 18:10 partem da Escola M. de Pombal; a das 08:25 passa duas vezes no Souto 1 (08:28/08:42, sobe direta à Granja e ao PIMM); nas partidas da Escola, o Hospital é servido depois do Mercado (ordem oficial do horário impresso).
+- shapes L3-V1 a L3-V17: compostos por blocos das shapes L2 desenhadas (Cardal→Escola, Souto, Fonte Nova, cauda do Degolaço) + conetores retos pin-a-pin nas zonas sem desenho (cadeia do Escoural, loop do PIMM, Souto 1↔Granja direta, Souto 2→Degolaço); distâncias acumuladas em metros; todas as paragens a ≤25,2 m do traçado (pior caso: Escola M. de Pombal, pin dentro do recinto).
+- stop_times.txt: coluna shape_dist_traveled preenchida para as 582 linhas L3 (projeção validada; 6 avisos de ordem Hospital/Mercado nas partidas da Escola resolvidos por ordem oficial confirmada).
+- linha-3-verde.html: página estática com o horário completo (43 paragens × 17 viagens); sitemap.xml atualizado.
+- routes.txt: L3,POMBUS,3,"Linha 3 - Verde",3,009639,FFFFFF (cor 009639 provisória; substituir quando houver cor oficial).
+
 ## Como testar
 1. Abrir index.html no browser (funciona offline, sem servidor).
 2. Validar o feed: zipar o conteúdo de gtfs/ e enviar a gtfs-validator.mobilitydata.org.
 
 ## Visualizar no mapa (mapa.html)
 - Mostra o feed GTFS lido diretamente da pasta gtfs/: traçado da viagem selecionada, paragens com horários de passagem (popup com todas as viagens que servem cada paragem), camada com todos os traçados e todas as paragens, horário da viagem.
-- Seletor de linhas: lista as 9 linhas da rede Pombus; as que ainda não têm dados no feed (L3, L3.1, L4, L4.1, L5, L6, L7) aparecem como «(Brevemente)» e desativadas. Tornam-se selecionáveis automaticamente quando a respetiva rota for adicionada a gtfs/routes.txt (route_id: L3, L3.1, L4, L4.1, L5, L6, L7). Ao mudar de linha, o seletor de viagens, o traçado, as paragens, os horários e a cor da linha passam a mostrar apenas essa linha; os popups das paragens identificam a linha e o padrão de cada passagem (ex.: 1·A).
+- Seletor de linhas: lista as 9 linhas da rede Pombus; as que ainda não têm dados no feed (L3.1, L4, L4.1, L5, L6, L7) aparecem como «(Brevemente)» e desativadas. Tornam-se selecionáveis automaticamente quando a respetiva rota for adicionada a gtfs/routes.txt (route_id: L3.1, L4, L4.1, L5, L6, L7). Ao mudar de linha, o seletor de viagens, o traçado, as paragens, os horários e a cor da linha passam a mostrar apenas essa linha; os popups das paragens identificam a linha e o padrão de cada passagem (ex.: 1·A).
 - Otimizado para telemóvel: alvos de toque maiores em ecrãs de toque (linhas do horário, seletores, opções de camadas), a linha do horário tocada fica destacada, área de notch respeitada em iPhone (safe-area) e tiles nítidos em ecrãs retina (detectRetina).
 - Janela «Sobre este projeto»: apresentação do projeto, nota de que não tem ligação oficial com a Câmara Municipal de Pombal, e email de contacto para sugestões (kiko_afn@hotmail.com) com assunto pré-preenchido.
 - SEO (2026-11-07): title/description/canonical/OG + JSON-LD no mapa.html, parágrafo de introdução indexável; linha-1-azul.html = página estática com o horário completo da Linha 1 (gerada dos gtfs/*.txt; quadro 54 paragens × 10 viagens) ligada ao mapa; robots.txt e sitemap.xml apontam a https://pombus.pt/.
@@ -41,6 +48,6 @@ Ambas as opções estão implementadas no mapa.html e desativadas por predefini�
 
 ## Próximos passos
 - Site publicado em https://pombus.pt/ (alojamento estático da dominios.pt; index.html no servidor = mapa.html do repo).
-- Submeter o sitemap (https://pombus.pt/sitemap.xml) no Google Search Console e pedir indexação de /, /linha-1-azul.html e /linha-2-vermelha.html.
-- Adicionar as restantes linhas do Pombus aos poucos (L3, L3.1, L4, L4.1, L5, L6, L7); cada linha nova ganha também a sua página de horários estáticos (linha-X.html) e entrada no sitemap.
+- Submeter o sitemap (https://pombus.pt/sitemap.xml) no Google Search Console e pedir indexação de /, /linha-1-azul.html, /linha-2-vermelha.html e /linha-3-verde.html.
+- Adicionar as restantes linhas do Pombus aos poucos (L3.1, L4, L4.1, L5, L6, L7); cada linha nova ganha também a sua página de horários estáticos (linha-X.html) e entrada no sitemap.
 - Validar o feed (gtfs-validator) e submeter ao Google Maps.

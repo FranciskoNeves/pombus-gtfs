@@ -94,3 +94,31 @@ P92,"R. do Centro 1 (volta)",39.917707,-8.647384
 P93,"R. Narciso (volta)",39.918908,-8.642557
 P94,"Estrada do Degolaço",39.916669,-8.639811
 P95,"Escadaria Gualdim Pais",39.91063,-8.640454
+P96,"Estrada do Escoural",39.928448,-8.643456
+P97,"Escoural",39.93187,-8.641917
+P98,"R. Principal (Escola)",39.933721,-8.640623
+P99,"Estrada (R. Principal)",39.935753,-8.640434
+P100,"Estrada (Capela)",39.940213,-8.640357
+P101,"R. da Maricata",39.937797,-8.643732
+P102,"R. dos Anjos",39.9324,-8.644062
+P103,"R. da Fonte",39.930848,-8.645233
+P104,"Granja",39.929831,-8.648137
+P105,"Alto da Granja",39.932497,-8.655719
+P106,"PIMM (ETAP)",39.936096,-8.658614
+P107,"PIMM (Parque de Máquinas Municipais)",39.939035,-8.660431
+P108,"PIMM (Associação Industrial)",39.941924,-8.662777
+P109,"PIMM (Industrial 1)",39.943704,-8.659726
+P110,"PIMM (Industrial 2)",39.945435,-8.656445
+P111,"PIMM (Industrial 1) (volta)",39.943871,-8.659807
+P112,"PIMM (Entrada Principal)",39.94054,-8.666851
+P113,"Expocentro",39.934691,-8.660235
+P114,"Alto da Granja (volta)",39.932079,-8.655165
+P115,"Granja (volta)",39.929592,-8.648454
+P116,"R. da Fonte (volta)",39.930823,-8.645121
+P117,"R. dos Anjos (volta)",39.932336,-8.644068
+P118,"R. da Maricata (volta)",39.937796,-8.643632
+P119,"Estrada (Capela) (volta)",39.940223,-8.640451
+P120,"Estrada (R. Principal) (volta)",39.93581,-8.640544
+P121,"R. Principal (Escola) (volta)",39.933608,-8.640932
+P122,"Escoural (volta)",39.93184,-8.642031
+P123,"Estrada do Escoural (volta)",39.928325,-8.643643
