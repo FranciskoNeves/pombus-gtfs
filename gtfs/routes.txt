@@ -1,4 +1,4 @@
 route_id,agency_id,route_short_name,route_long_name,route_type,route_color,route_text_color
-L1,POMBUS,1,"Linha 1 - Azul",3,0072BC,FFFFFF
+L1,POMBUS,1,"Linha 1 - Azul",3,0070C0,FFFFFF
 L2,POMBUS,2,"Linha 2 - Vermelha",3,FF0000,FFFFFF
 L3,POMBUS,3,"Linha 3 - Verde",3,009639,FFFFFF
