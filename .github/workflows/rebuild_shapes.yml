@@ -2,7 +2,7 @@ name: rebuild-shapes
 on:
   push:
     branches: [main]
-    paths: ['transport/**', 'gtfs-tools/**']
+    paths: ['transport/**', 'gtfs-tools/**', '.github/workflows/rebuild_shapes.yml']
 permissions:
   contents: write
 jobs:
@@ -12,6 +12,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Reassemble e decodificar delta
         run: |
+          if ! ls transport/chunk_* >/dev/null 2>&1; then echo "sem chunks de transporte - nada a reconstruir"; exit 0; fi
           cat transport/chunk_* > /tmp/new_shapes.delta
           python3 gtfs-tools/decode_shapes.py /tmp/new_shapes.delta gtfs/shapes.txt
       - name: Commit shapes.txt reconstruido
@@ -21,4 +22,12 @@ jobs:
           git add gtfs/shapes.txt
           if git diff --cached --quiet; then echo "sem alteracoes"; exit 0; fi
           git commit -m "shapes: reconstruir shapes.txt completo a partir dos chunks de transporte (V15 desenhada) [skip ci]"
+          git push
+      - name: Limpeza dos chunks de transporte
+        run: |
+          git config user.name "pombus-gtfs-bot"
+          git config user.email "action@github.com"
+          git rm -rq --ignore-unmatch transport/ >/dev/null
+          if git diff --cached --quiet; then echo "nada a limpar"; exit 0; fi
+          git commit -m "transport: remocao dos chunks apos reconstrucao bem-sucedida [skip ci]"
           git push
