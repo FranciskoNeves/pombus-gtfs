@@ -1,0 +1,24 @@
+name: rebuild-shapes
+on:
+  push:
+    branches: [main]
+    paths: ['transport/**', 'gtfs-tools/**']
+permissions:
+  contents: write
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Reassemble e decodificar delta
+        run: |
+          cat transport/chunk_* > /tmp/new_shapes.delta
+          python3 gtfs-tools/decode_shapes.py /tmp/new_shapes.delta gtfs/shapes.txt
+      - name: Commit shapes.txt reconstruido
+        run: |
+          git config user.name "pombus-gtfs-bot"
+          git config user.email "action@github.com"
+          git add gtfs/shapes.txt
+          if git diff --cached --quiet; then echo "sem alteracoes"; exit 0; fi
+          git commit -m "shapes: reconstruir shapes.txt completo a partir dos chunks de transporte (V15 desenhada) [skip ci]"
+          git push
