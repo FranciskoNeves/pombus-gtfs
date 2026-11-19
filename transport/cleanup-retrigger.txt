@@ -1,1 +1,1 @@
-Limpeza dos chunks: re-trigger do passo cleaning apos falha do run anterior. Os chunks decodificam para shapes.txt identico ao HEAD (ce97f14e); este ficheiro e todo o transport/ serao removidos pelo passo de limpeza. [skip gtfs]
+Re-trigger 2 da limpeza dos chunks (commit anterior by-passou o workflow por conter [skip ci]).
