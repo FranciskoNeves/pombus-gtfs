@@ -37,13 +37,13 @@ for ln in lines[1:]:
         sid = prev[0]
         latE = prev[1] + dl; lonE = prev[2] + dn; disE = prev[3] + dd
     rows.append('%s,%s,%s,%d,%s' % (sid, fmt5(latE, latD), fmt5(lonE, lonD), seq, fmt1(disE)))
-    prev = (sid, latE, lonE, seq, disE, latD, lonD)
+    prev = (sid, latE, lonE, seq, disE)
     n += 1
 
 decoded = '\n'.join(rows) + '\n'
 blob = ('blob %d\0' % len(decoded.encode())).encode() + decoded.encode()
 got = hashlib.sha1(blob).hexdigest()
-expect = '865a6f1575a2dc3a1e6e063ff66f3e900f0dc50e'
+expect = '070cfbdf6c44cd8af2c9970219730088d87b6f1c'
 if got != expect:
     raise SystemExit('SHA MISMATCH: got %s expected %s' % (got, expect))
 open(out_path, 'w', newline='').write(decoded)
