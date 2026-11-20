@@ -10,7 +10,7 @@ P08,"Governos 2 (R. Miguel Torga)",39.922658235530896,-8.624604045028791
 P09,"Governos 3 (R. dos Governos 1)",39.92246898973844,-8.621170817585858
 P10,"Governos 4 (R. dos Governos 2)",39.923900367259094,-8.619927546015182
 P11,"Governos 5 (Rotunda)",39.92459428169255,-8.618418853759332
-P12,"Vinagres 1 (R. dos Vinagres)",39.92312384785638,-8.617350732928017
+P12,"Vinagres 1 (R. dos Vinagres)",39.92312384785638,-8.617350732808017
 P13,"Vinagres 2 (R. dos Vinagres)",39.92189,-8.61867
 P14,"Vinagres 3 (R. dos Vinagres)",39.92137,-8.61971
 P15,"Jardim Biscarrose",39.92003,-8.62146
@@ -34,7 +34,7 @@ P32,"Escola Gualdim Pais",39.91096749025797,-8.641420422406489
 P33,"R. Pinhal Leitão",39.909134031988614,-8.644917120849192
 P34,"R. do Valinho (Tv. Bom Jesus)",39.90889631569834,-8.646911171808165
 P35,"R. Vale da Barreira",39.90826450194526,-8.649850426456126
-P36,"R. das Maiorcas",39.90621949282264,-8.653923902244514
+P36,"R. das Maiorcas",39.90621949282264,-8.653923902444514
 P37,"R. do Lagar",39.906824015154854,-8.651166273269693
 P38,"Charneca (R. Direita)",39.90485915330056,-8.656237623695635
 P39,"Charneca (R. Principal)",39.90410279407748,-8.652062083729888
@@ -122,3 +122,17 @@ P120,"Estrada (R. Principal) (volta)",39.93581,-8.640544
 P121,"R. Principal (Escola) (volta)",39.933608,-8.640932
 P122,"Escoural (volta)",39.93184,-8.642031
 P123,"Estrada do Escoural (volta)",39.928325,-8.643643
+P124,"Quinta da Gramela 1",39.951981,-8.643372
+P125,"Quinta da Gramela 2",39.951981,-8.643372
+P126,"Carregueiro 1",39.95635,-8.646421
+P127,"Carregueiro (R. das Regadias)",39.95949,-8.646255
+P128,"Aldeia dos Redondos 1",39.96482,-8.651262
+P129,"Aldeia dos Redondos 2",39.966873,-8.653838
+P130,"Aldeia dos Redondos (R. de S. Jorge)",39.965884,-8.654586
+P131,"R. das Barreiras Altas",39.958213,-8.665423
+P132,"R. das Sesmarias",39.957987,-8.670418
+P133,"Barros da Paz (R. do Casal Louro)",39.95759,-8.673474
+P134,"R. D. Inês de Castro 1",39.954738,-8.67277
+P135,"R. D. Inês de Castro 2",39.95006,-8.67227
+P136,"R. D. Inês de Castro 3",39.94731,-8.672765
+P137,"Pombal Fashion",39.94522,-8.671849
