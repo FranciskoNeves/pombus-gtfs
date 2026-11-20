@@ -1,2 +1,2 @@
 feed_publisher_name,feed_publisher_url,feed_lang,feed_start_date,feed_end_date,feed_version,feed_contact_email,feed_contact_url
-"Pombus - Câmara Municipal de Pombal",https://www.cm-pombal.pt/servicos/pombus,pt,20260101,20261231,2026-11-20b-linha3-1,geral@cm-pombal.pt,https://www.cm-pombal.pt/servicos/pombus
+"Pombus - Câmara Municipal de Pombal",https://www.cm-pombal.pt/servicos/pombus,pt,20260101,20261231,2026-11-20c-linha3-1,geral@cm-pombal.pt,https://www.cm-pombal.pt/servicos/pombus
