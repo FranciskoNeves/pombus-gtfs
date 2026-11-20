@@ -1,0 +1,32 @@
+name: Deploy pombus.pt
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-pombus
+  cancel-in-progress: true
+
+env:
+  SSH_HOST: ${{ secrets.SSH_HOST }}
+
+jobs:
+  deploy:
+    # salta silenciosamente enquanto os secrets não estiverem definidos no GitHub
+    if: ${{ env.SSH_HOST != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publicar (git pull na raiz do site)
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          port: ${{ secrets.SSH_PORT }}
+          key: ${{ secrets.SSH_KEY }}
+          script_stop: true
+          script: |
+            cd ${{ secrets.DEPLOY_PATH }}
+            git pull --ff-only origin main
+            echo "Publicado: $(git rev-parse --short HEAD)"

@@ -1,0 +1,5 @@
+# Proteção do repo Git publicado na raiz do site
+# Bloquear o histórico Git e os diretórios internos
+RedirectMatch 404 ^/\.git
+RedirectMatch 404 ^/\.github
+RedirectMatch 404 ^/gtfs-tools
