@@ -54,3 +54,13 @@ L3.1,escolar,L3.1-1718,"Largo do Cardal",0,L3.1-V10
 L3.1,escolar,L3.1-1810,"Largo do Cardal",0,L3.1-V11
 L3.1,escolar,L3.1-1830,"Largo do Cardal",0,L3.1-V12
 L3.1,escolar,L3.1-1835,"Largo do Cardal",0,L3.1-V13
+L4,escolar,L4-0700,"Largo do Cardal",0,L4-V1
+L4,escolar,L4-0710,"Escola M. de Pombal",0,L4-V2
+L4,escolar,L4-0737,"Largo do Cardal",0,L4-V3
+L4,escolar,L4-1125,"Largo do Cardal",0,L4-V4
+L4,escolar,L4-1215,"Largo do Cardal",0,L4-V5
+L4,escolar,L4-1305,"Largo do Cardal",0,L4-V6
+L4,escolar,L4-1330,"Escola M. de Pombal",0,L4-V7
+L4,escolar,L4-1730,"Largo do Cardal",0,L4-V8
+L4,escolar,L4-1735,"Largo do Cardal",0,L4-V9
+L4,escolar,L4-1920,"Largo do Cardal",0,L4-V10
