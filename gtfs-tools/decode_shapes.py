@@ -43,7 +43,7 @@ for ln in lines[1:]:
 decoded = '\n'.join(rows) + '\n'
 blob = ('blob %d\0' % len(decoded.encode())).encode() + decoded.encode()
 got = hashlib.sha1(blob).hexdigest()
-expect = "cb4686b4028709a3c3a6c0734edd12a9d75fcda1"
+expect = "e338194011d10a84d05421ea02b958c5f5f1b252"
 if got != expect:
     raise SystemExit('SHA MISMATCH: got %s expected %s' % (got, expect))
 open(out_path, 'w', newline='').write(decoded)

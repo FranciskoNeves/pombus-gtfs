@@ -4,3 +4,4 @@ L2,POMBUS,2,"Linha 2 - Vermelha",3,FF0000,FFFFFF
 L3,POMBUS,3,"Linha 3 - Verde",3,009639,FFFFFF
 L3.1,POMBUS,3.1,"Linha 3.1 - Verde (Via Aldeia dos Redondos)",3,009639,FFFFFF
 L4,POMBUS,4,"Linha 4 - Amarela",3,FFFF00,000000
+L4.1,POMBUS,4.1,"Linha 4.1 - Amarela (Via Valdeira)",3,FFFFA7,000000

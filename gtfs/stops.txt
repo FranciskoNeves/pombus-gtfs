@@ -157,3 +157,13 @@ P155,"R. do Seixo 2",39.909497,-8.636566
 P156,"Quinta da Casinha",39.907468,-8.63639
 P157,"Urb. Jardim das Oliveiras",39.906693,-8.637995
 P158,"Urb. Casal Galego",39.909303,-8.64043
+P159,"Casalinho (R. Principal 1)",39.8900941,-8.638092
+P160,"Casalinho (R. Principal 2)",39.8874152,-8.6404796
+P161,"Casalinho (Capela)",39.8854044,-8.6429702
+P162,"Carvalhais",39.877471,-8.6472049
+P163,"Valdeira (R. Marquês de Pombal)",39.876081,-8.6509953
+P164,"Valdeira (Capela)",39.8737427,-8.6562103
+P165,"Cruta",39.8683935,-8.6581555
+P166,"Valdeira (R. do Olival)",39.8737419,-8.6562113
+P167,"Carvalhais (R. Principal)",39.88053967631639,-8.645945813234109
+P168,"Casalinho (Escola Básica)",39.8900941,-8.638092
