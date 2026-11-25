@@ -166,4 +166,4 @@ P164,"Valdeira (Capela)",39.8737427,-8.6562103
 P165,"Cruta",39.8683935,-8.6581555
 P166,"Valdeira (R. do Olival)",39.8737419,-8.6562113
 P167,"Carvalhais (R. Principal)",39.88053967631639,-8.645945813234109
-P168,"Casalinho (Escola Básica)",39.8900941,-8.638092
+P168,"Casalinho (Escola Básica)",39.892626,-8.6357688
